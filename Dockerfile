@@ -16,7 +16,7 @@ COPY . .
 
 # Generate Prisma client and build frontend & backend
 RUN npm run db:generate
-RUN npm run build
+RUN npm run build:server && npm run build
 
 # Production Runner Stage
 FROM node:20-alpine AS runner
