@@ -20,8 +20,10 @@ export function errorMiddleware(
   res: Response,
   _next: NextFunction
 ): void {
-  if (env.NODE_ENV === 'development') {
-    console.error('💥 Server Error Handler caught:', err);
+  // Always log server errors for debugging in production and development
+  console.error('💥 [Server Error]:', err?.message || err);
+  if (err?.stack) {
+    console.error(err.stack);
   }
 
   // Zod Validation Error
@@ -44,6 +46,18 @@ export function errorMiddleware(
     return;
   }
 
+  // Prisma Database Connection / Initialization Error
+  if (
+    err instanceof Prisma.PrismaClientInitializationError ||
+    (typeof err?.message === 'string' && err.message.includes("Can't reach database server"))
+  ) {
+    res.status(503).json({
+      success: false,
+      message: 'Database connection failed. Please verify that your DATABASE_URL environment variable is set and PostgreSQL is running.',
+    });
+    return;
+  }
+
   // Prisma Known Request Errors
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === 'P2002') {
@@ -61,14 +75,19 @@ export function errorMiddleware(
       });
       return;
     }
+    if (err.code === 'P2021') {
+      res.status(500).json({
+        success: false,
+        message: 'Database tables not found. Please run "npx prisma db push" or seed database.',
+      });
+      return;
+    }
   }
 
   // Fallback 500 Internal Server Error
   const statusCode = err.statusCode || 500;
   const message =
-    env.NODE_ENV === 'production'
-      ? 'An internal server error occurred'
-      : err.message || 'Internal Server Error';
+    err.message || (env.NODE_ENV === 'production' ? 'An internal server error occurred' : 'Internal Server Error');
 
   res.status(statusCode).json({
     success: false,
