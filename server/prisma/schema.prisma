@@ -39,9 +39,33 @@ model Product {
   @@map("products")
 }
 
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String?
+  name         String
+  phone        String?
+  address      String?
+  apartment    String?
+  city         String?
+  state        String?
+  postalCode   String?
+  avatarUrl    String?
+  googleId     String?      @unique
+  authProvider AuthProvider @default(LOCAL)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  orders       Order[]
+
+  @@index([email])
+  @@index([googleId])
+  @@map("users")
+}
+
 model Order {
   id              String        @id @default(uuid())
   orderNumber     String        @unique
+  userId          String?
   customerName    String
   email           String
   mobile          String
@@ -62,11 +86,13 @@ model Order {
   paymentProvider String?
   paymentStatus   PaymentStatus @default(Pending)
   items           OrderItem[]
+  user            User?         @relation(fields: [userId], references: [id])
 
   @@index([status])
   @@index([createdAt])
   @@index([email])
   @@index([mobile])
+  @@index([userId])
   @@map("orders")
 }
 
@@ -102,4 +128,9 @@ enum PaymentStatus {
 
 enum AdminRole {
   ADMIN
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
 }

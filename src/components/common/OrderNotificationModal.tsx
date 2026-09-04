@@ -75,9 +75,9 @@ export const OrderNotificationModal: React.FC = () => {
               dismissNotification();
               navigate('admin');
             }}
-            className="bg-studio-terracotta hover:bg-purple-400 text-black py-2.5 px-3 rounded-xl font-display font-bold text-xs uppercase tracking-wider transition-colors shadow-md flex items-center justify-center gap-1.5"
+            className="bg-studio-terracotta hover:bg-purple-400 text-white py-2.5 px-3 rounded-xl font-display font-bold text-xs uppercase tracking-wider transition-colors shadow-md flex items-center justify-center gap-1.5"
           >
-            <Sparkles className="w-3.5 h-3.5 text-black" />
+            <Sparkles className="w-3.5 h-3.5" />
             <span>Open Admin</span>
           </button>
         </div>

@@ -56,7 +56,11 @@ export const orderService = {
         skip,
         take: limit,
         include: {
-          items: true,
+          items: {
+            include: {
+              product: true,
+            },
+          },
         },
         orderBy: {
           createdAt: 'desc',
@@ -81,13 +85,22 @@ export const orderService = {
    * Public Customer Order Tracking: Verifies orderNumber AND mobile number.
    * Returns generic 404 on any mismatch to prevent information leakage.
    */
+  /**
+   * Public Customer Order Tracking: Verifies orderNumber AND mobile number.
+   * Returns generic 404 on any mismatch to prevent information leakage.
+   */
   async trackOrder(orderNumber: string, inputMobile: string) {
     if (!orderNumber || !inputMobile) {
       throw new AppError('Order number and mobile number are required', 400);
     }
 
-    const order = await prisma.order.findUnique({
-      where: { orderNumber: orderNumber.trim() },
+    const order = await prisma.order.findFirst({
+      where: {
+        orderNumber: {
+          equals: orderNumber.trim(),
+          mode: 'insensitive',
+        },
+      },
       include: { items: true },
     });
 
@@ -129,10 +142,18 @@ export const orderService = {
   async getOrderById(idOrNumber: string) {
     const order = await prisma.order.findFirst({
       where: {
-        OR: [{ id: idOrNumber }, { orderNumber: idOrNumber }],
+        OR: [
+          { id: idOrNumber },
+          { orderNumber: idOrNumber },
+          { orderNumber: { equals: idOrNumber, mode: 'insensitive' } },
+        ],
       },
       include: {
-        items: true,
+        items: {
+          include: {
+            product: true,
+          },
+        },
       },
     });
 
@@ -147,10 +168,19 @@ export const orderService = {
    * Retrieves a single order specifically by orderNumber.
    */
   async getOrderByNumber(orderNumber: string) {
-    const order = await prisma.order.findUnique({
-      where: { orderNumber },
+    const order = await prisma.order.findFirst({
+      where: {
+        orderNumber: {
+          equals: orderNumber.trim(),
+          mode: 'insensitive',
+        },
+      },
       include: {
-        items: true,
+        items: {
+          include: {
+            product: true,
+          },
+        },
       },
     });
 
@@ -165,7 +195,7 @@ export const orderService = {
    * Server-side order creation with price calculation, stock verification,
    * unique order number generation, and transactional stock decrement.
    */
-  async createOrder(input: CreateOrderInput) {
+  async createOrder(input: CreateOrderInput, userId?: string) {
     // 1. Normalize Customer Details
     const customer = input.customer || {
       customerName: input.customerName || `${input.customerName || 'Valued Customer'}`,
@@ -180,15 +210,35 @@ export const orderService = {
     const customerName =
       customer.customerName ||
       `${(customer as any).firstName || ''} ${(customer as any).lastName || ''}`.trim() ||
+      input.customerName ||
       'Valued Customer';
-    const email = customer.email;
-    const mobile = customer.mobile || (customer as any).phone || '';
-    const address = customer.address;
-    const city = customer.city;
-    const state = customer.state;
-    const postalCode = customer.postalCode;
+    const email = customer.email || input.email || 'customer@example.com';
+    const mobile = customer.mobile || (customer as any).phone || input.mobile || input.phone || '';
+    const address = customer.address || input.address || 'Address on file';
+    const city = customer.city || input.city || 'City';
+    const state = customer.state || input.state || 'State';
+    const postalCode = customer.postalCode || input.postalCode || '000000';
 
-    // 2. Fetch and Validate Products from PostgreSQL
+    // Validate COD eligibility: COD is strictly restricted to Puducherry / Pondicherry
+    if (input.paymentMethod === 'COD') {
+      const s = (state || '').trim().toLowerCase();
+      const c = (city || '').trim().toLowerCase();
+      const isPuducherry = 
+        s.includes('puducherry') || 
+        s.includes('pondicherry') || 
+        s === 'py' || 
+        c.includes('puducherry') || 
+        c.includes('pondicherry');
+
+      if (!isPuducherry) {
+        throw new AppError(
+          'Cash on Delivery (COD) is only available for deliveries within Puducherry / Pondicherry. Please use Direct UPI QR payment.',
+          400
+        );
+      }
+    }
+
+    // 2. Fetch and Validate Products from PostgreSQL (Supports Lookup by ID, Slug, or Custom Packs)
     const itemCalculations: Array<{
       productId: string;
       productName: string;
@@ -200,9 +250,58 @@ export const orderService = {
     let subtotal = 0;
 
     for (const item of input.items) {
-      const product = await prisma.product.findUnique({
-        where: { id: item.productId },
+      let product = await prisma.product.findFirst({
+        where: {
+          OR: [{ id: item.productId }, { slug: item.productId }],
+        },
       });
+
+      // If product does not exist in DB, handle custom / dynamic products (e.g., custom Polaroid packs)
+      if (!product && (item.productId.startsWith('custom-') || item.productName?.toLowerCase().includes('custom') || item.productId.includes('polaroid') || item.productId.includes('poster') || item.productId.includes('pack-'))) {
+        const isPoster = item.productId.includes('poster') || item.productName?.toLowerCase().includes('poster');
+        const customName = item.productName || (isPoster ? 'Custom Wall Poster' : 'Custom Polaroid Pack');
+        const customPrice = item.unitPrice !== undefined ? Number(item.unitPrice) : (isPoster ? 60.00 : 50.00);
+        const customImage = item.imageUrl || (isPoster ? '/varanam ayiram.jpeg' : '/vtv-polaroid.jpg');
+        const photosList = item.uploadedPhotos || item.images || (item.imageUrl ? [item.imageUrl] : [customImage]);
+        
+        let descriptionPayload: string;
+        if (typeof item.description === 'string' && item.description.startsWith('{')) {
+          descriptionPayload = item.description;
+        } else if (typeof (item as any).customDescription === 'string' && (item as any).customDescription.startsWith('{')) {
+          descriptionPayload = (item as any).customDescription;
+        } else {
+          descriptionPayload = JSON.stringify({
+            customType: isPoster ? 'wall-poster' : 'polaroid',
+            caption: item.customCaption,
+            songUrl: item.songUrl,
+            photos: photosList,
+            photoCount: photosList.length,
+          });
+        }
+
+        product = await prisma.product.upsert({
+          where: { id: item.productId },
+          update: {
+            name: customName,
+            price: new Prisma.Decimal(customPrice),
+            description: descriptionPayload,
+            imageUrl: photosList[0] || customImage,
+            stock: 9999,
+            isActive: true,
+          },
+          create: {
+            id: item.productId,
+            name: customName,
+            slug: item.productId,
+            description: descriptionPayload,
+            category: isPoster ? 'posters' : 'polaroids',
+            price: new Prisma.Decimal(customPrice),
+            imageUrl: photosList[0] || customImage,
+            stock: 9999,
+            isActive: true,
+          },
+        });
+      }
 
       if (!product || !product.isActive) {
         throw new AppError(`Product with ID '${item.productId}' is not available`, 400);
@@ -212,13 +311,15 @@ export const orderService = {
         throw new AppError(`Insufficient stock for ${product.name}`, 409);
       }
 
-      const unitPrice = Number(product.price);
+      const unitPrice = item.unitPrice !== undefined && Number(item.unitPrice) > 0
+        ? Number(item.unitPrice)
+        : Number(product.price);
       const lineTotal = unitPrice * item.quantity;
       subtotal += lineTotal;
 
       itemCalculations.push({
         productId: product.id,
-        productName: product.name,
+        productName: item.productName || product.name,
         quantity: item.quantity,
         unitPrice,
         lineTotal,
@@ -226,8 +327,16 @@ export const orderService = {
     }
 
     // 3. Shipping Calculation Rule
-    // Orders >= ₹999 -> Free Shipping; otherwise ₹80
-    const shippingAmount = subtotal >= 999 ? 0 : 80;
+    // Free Shipping for Puducherry / Pondicherry OR orders >= ₹999; otherwise ₹80
+    const s = (state || '').trim().toLowerCase();
+    const c = (city || '').trim().toLowerCase();
+    const isPondicherry = 
+      s.includes('puducherry') || 
+      s.includes('pondicherry') || 
+      s === 'py' || 
+      c.includes('puducherry') || 
+      c.includes('pondicherry');
+    const shippingAmount = isPondicherry || subtotal >= 999 ? 0 : 80;
     const totalAmount = subtotal + shippingAmount;
 
     // 4. Generate Order Number & Transactional Execution with Retry
@@ -256,6 +365,7 @@ export const orderService = {
           return tx.order.create({
             data: {
               orderNumber,
+              userId: userId || null,
               customerName,
               email,
               mobile,
@@ -312,7 +422,11 @@ export const orderService = {
   async updateOrderStatus(id: string, newStatus: OrderStatus) {
     const existingOrder = await prisma.order.findFirst({
       where: {
-        OR: [{ id }, { orderNumber: id }],
+        OR: [
+          { id },
+          { orderNumber: id },
+          { orderNumber: { equals: id, mode: 'insensitive' } },
+        ],
       },
     });
 

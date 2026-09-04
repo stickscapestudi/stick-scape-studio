@@ -32,8 +32,7 @@ export interface Product {
   slug: string;
   category: ProductCategory;
   theme: AestheticTheme;
-  price: number; // Base price in USD
-  originalPrice?: number;
+  price: number; // Base price in INR / ₹
   tags: string[];
   description: string;
   shortDescription: string;
@@ -63,6 +62,11 @@ export interface CartItem {
   basePrice: number;
   unitPrice: number;
   image: string;
+  images?: string[];
+  uploadedPhotos?: string[];
+  customCaption?: string;
+  songUrl?: string;
+  customDescription?: string;
   selectedSize: ProductSize;
   selectedFinish?: ProductFinish;
   quantity: number;
@@ -144,6 +148,6 @@ export interface ToastMessage {
   id: string;
   title: string;
   message: string;
-  type?: 'success' | 'info' | 'cart';
+  type?: 'success' | 'info' | 'cart' | 'error';
   image?: string;
 }

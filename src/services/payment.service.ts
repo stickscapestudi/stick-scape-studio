@@ -51,6 +51,26 @@ export const paymentService = {
   },
 
   /**
+   * Submits direct UPI QR payment confirmation with optional UTR number.
+   */
+  async submitUpiPayment(payload: {
+    orderNumber: string;
+    utrNumber?: string;
+    upiId?: string;
+  }): Promise<OrderConfirmationData> {
+    const response = await api.post<{ success: boolean; data: OrderConfirmationData; message?: string }>(
+      '/payments/verify-upi',
+      payload
+    );
+
+    if (response && response.success && response.data) {
+      return response.data;
+    }
+
+    throw new Error(response.message || 'UPI Payment confirmation failed.');
+  },
+
+  /**
    * Dynamically loads the Razorpay Checkout SDK script into document head.
    */
   loadRazorpaySdk(): Promise<boolean> {

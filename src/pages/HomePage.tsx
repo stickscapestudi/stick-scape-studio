@@ -37,13 +37,6 @@ export const HomePage: React.FC = () => {
             {/* Left Column: Editorial Headline & Actions */}
             <div className="lg:col-span-7 space-y-8">
               
-              <div className="inline-flex items-center gap-2 bg-studio-card border border-purple-500/30 px-3.5 py-1.5 rounded-full shadow-subtle">
-                <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                <span className="font-mono text-xs font-semibold text-purple-200 uppercase tracking-wider">
-                  Spring Art Drop No. 04 &bull; 300 GSM Archival Inks
-                </span>
-              </div>
-
               <div className="space-y-4">
                 <h1 className="font-display font-black text-4xl sm:text-6xl xl:text-7xl text-white tracking-tight leading-[1.08]">
                   Wall art made for <span className="italic font-serif font-normal text-purple-400 underline decoration-purple-500/60 decoration-wavy">your room’s</span> soul.
@@ -72,14 +65,10 @@ export const HomePage: React.FC = () => {
               </div>
 
               {/* Micro Trust Stats */}
-              <div className="pt-6 border-t border-studio-border/70 grid grid-cols-3 gap-6 max-w-lg">
+              <div className="pt-6 border-t border-studio-border/70 grid grid-cols-2 gap-8 max-w-md">
                 <div>
                   <div className="font-mono font-black text-2xl text-white">300<span className="text-purple-400 text-sm">GSM</span></div>
                   <div className="text-xs text-studio-muted font-medium">Fine Art Cotton Paper</div>
-                </div>
-                <div>
-                  <div className="font-mono font-black text-2xl text-white">4.9★</div>
-                  <div className="text-xs text-studio-muted font-medium">1,200+ Verified Buyers</div>
                 </div>
                 <div>
                   <div className="font-mono font-black text-2xl text-white">100%</div>
@@ -297,10 +286,6 @@ export const HomePage: React.FC = () => {
 
               <div className="flex items-baseline gap-4">
                 <span className="font-mono font-black text-3xl text-white">₹799</span>
-                <span className="font-mono text-lg text-neutral-500 line-through">₹1,299</span>
-                <span className="bg-studio-terracotta text-black font-mono text-xs font-bold px-2.5 py-1 rounded-lg">
-                  SAVE 38%
-                </span>
               </div>
 
               <div className="flex flex-wrap gap-4 pt-2">

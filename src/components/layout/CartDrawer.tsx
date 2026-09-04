@@ -68,14 +68,14 @@ export const CartDrawer: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ShoppingBag className="w-5 h-5 text-studio-terracotta" />
-                <h3 className="font-display font-bold text-lg text-studio-dark">Your Studio Bag</h3>
-                <span className="bg-studio-dark text-white font-mono text-xs px-2 py-0.5 rounded-full font-bold">
+                <h3 className="font-display font-bold text-lg text-studio-charcoal">Your Studio Bag</h3>
+                <span className="bg-studio-terracotta text-white font-mono text-xs px-2 py-0.5 rounded-full font-bold">
                   {totalItemsCount}
                 </span>
               </div>
               <button
                 onClick={closeCart}
-                className="p-1.5 text-studio-muted hover:text-studio-dark rounded-lg hover:bg-studio-sand transition-colors"
+                className="p-1.5 text-studio-muted hover:text-studio-charcoal rounded-lg hover:bg-studio-sand transition-colors"
                 aria-label="Close bag"
               >
                 <X className="w-5 h-5" />
@@ -88,10 +88,10 @@ export const CartDrawer: React.FC = () => {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs text-studio-charcoal">
                     <span className="flex items-center gap-1.5 font-medium">
-                      <Truck className="w-3.5 h-3.5 text-purple-400" />
+                      <Truck className="w-3.5 h-3.5 text-studio-terracotta" />
                       Add <strong className="text-purple-400 font-mono font-bold">₹{Math.round(amountToFreeShipping)}</strong> for Free Shipping!
                     </span>
-                    <span className="font-mono text-[11px] text-purple-300">{freeShippingProgress}%</span>
+                    <span className="font-mono text-[11px] text-studio-muted">{freeShippingProgress}%</span>
                   </div>
                   <div className="w-full bg-studio-border h-2 rounded-full overflow-hidden">
                     <div
@@ -101,8 +101,8 @@ export const CartDrawer: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 text-xs font-semibold text-studio-sage bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-200">
-                  <Sparkles className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300 bg-emerald-950/40 px-3 py-2 rounded-lg border border-emerald-500/30">
+                  <Sparkles className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                   <span>Unlocked! You qualify for Free Worldwide Shipping! 🎉</span>
                 </div>
               )}
@@ -116,7 +116,7 @@ export const CartDrawer: React.FC = () => {
                 <div className="w-16 h-16 bg-studio-sand rounded-full flex items-center justify-center mb-4 text-studio-muted">
                   <ShoppingBag className="w-8 h-8 stroke-1" />
                 </div>
-                <h4 className="font-display font-bold text-lg text-studio-dark">Your bag is empty</h4>
+                <h4 className="font-display font-bold text-lg text-studio-charcoal">Your bag is empty</h4>
                 <p className="text-sm text-studio-muted mt-1 max-w-xs">
                   Discover our aesthetic art prints, retro Polaroids, and bedroom wall bundles.
                 </p>
@@ -125,7 +125,7 @@ export const CartDrawer: React.FC = () => {
                     closeCart();
                     navigate('shop');
                   }}
-                  className="mt-6 bg-studio-terracotta text-black font-bold px-6 py-2.5 rounded-full text-xs uppercase tracking-wider hover:bg-purple-400 transition-colors shadow-md"
+                  className="mt-6 bg-studio-terracotta text-white font-bold px-6 py-2.5 rounded-full text-xs uppercase tracking-wider hover:bg-studio-terracottaHover transition-colors shadow-md"
                 >
                   Explore Collection
                 </button>
@@ -149,7 +149,7 @@ export const CartDrawer: React.FC = () => {
                             closeCart();
                             navigate('product', { id: item.id });
                           }}
-                          className="text-sm font-bold text-studio-dark hover:text-studio-terracotta cursor-pointer transition-colors truncate"
+                          className="text-sm font-bold text-studio-charcoal hover:text-studio-terracotta cursor-pointer transition-colors truncate"
                         >
                           {item.name}
                         </h4>
@@ -167,7 +167,7 @@ export const CartDrawer: React.FC = () => {
                       </p>
 
                       {item.selectedFinish && (
-                        <p className="text-[11px] text-studio-sage font-medium truncate">
+                        <p className="text-[11px] text-purple-400 font-medium truncate">
                           &bull; {item.selectedFinish.name}
                         </p>
                       )}
@@ -178,24 +178,24 @@ export const CartDrawer: React.FC = () => {
                       <div className="flex items-center border border-studio-border rounded-lg bg-studio-sand/40">
                         <button
                           onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)}
-                          className="p-1 text-studio-charcoal hover:text-studio-dark hover:bg-studio-sand rounded-l-md transition-colors"
+                          className="p-1 text-studio-charcoal hover:text-white hover:bg-studio-sand rounded-l-md transition-colors"
                           aria-label="Decrease quantity"
                         >
                           <Minus className="w-3.5 h-3.5" />
                         </button>
-                        <span className="px-2.5 font-mono text-xs font-semibold text-studio-dark">
+                        <span className="px-2.5 font-mono text-xs font-semibold text-studio-charcoal">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)}
-                          className="p-1 text-studio-charcoal hover:text-studio-dark hover:bg-studio-sand rounded-r-md transition-colors"
+                          className="p-1 text-studio-charcoal hover:text-white hover:bg-studio-sand rounded-r-md transition-colors"
                           aria-label="Increase quantity"
                         >
                           <Plus className="w-3.5 h-3.5" />
                         </button>
                       </div>
 
-                      <span className="font-mono text-sm font-bold text-white">
+                      <span className="font-mono text-sm font-bold text-studio-charcoal">
                         ₹{Math.round(item.unitPrice * item.quantity)}
                       </span>
                     </div>
@@ -219,26 +219,26 @@ export const CartDrawer: React.FC = () => {
                       placeholder="Promo Code (e.g. STICK10)"
                       value={couponInput}
                       onChange={(e) => setCouponInput(e.target.value)}
-                      className="w-full text-xs bg-studio-sand border border-studio-border rounded-lg pl-9 pr-3 py-2 uppercase font-mono text-white placeholder:text-neutral-500 focus:outline-none focus:border-studio-terracotta"
+                      className="w-full text-xs bg-studio-sand border border-studio-border rounded-lg pl-9 pr-3 py-2 uppercase font-mono text-studio-charcoal placeholder:text-studio-muted/60 focus:outline-none focus:border-studio-terracotta"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="bg-studio-terracotta text-black font-bold px-3 py-2 rounded-lg text-xs hover:bg-purple-400 transition-colors"
+                    className="bg-studio-sand hover:bg-studio-terracotta hover:text-white text-studio-charcoal border border-studio-border font-bold px-3 py-2 rounded-lg text-xs transition-colors"
                   >
                     Apply
                   </button>
                 </div>
 
                 {appliedPromo && (
-                  <div className="flex items-center justify-between bg-purple-950 text-purple-200 text-xs px-3 py-1.5 rounded-lg border border-purple-500/40">
+                  <div className="flex items-center justify-between bg-purple-950/80 text-purple-300 text-xs px-3 py-1.5 rounded-lg border border-purple-500/40">
                     <span className="font-mono font-semibold">
                       🏷️ {appliedPromo.code} ({appliedPromo.percent}% OFF)
                     </span>
                     <button
                       type="button"
                       onClick={removePromo}
-                      className="text-purple-300 font-bold hover:underline"
+                      className="text-white font-bold hover:underline"
                     >
                       Remove
                     </button>
@@ -256,7 +256,7 @@ export const CartDrawer: React.FC = () => {
               <div className="space-y-1.5 text-xs text-studio-charcoal pt-2 border-t border-studio-border/60">
                 <div className="flex justify-between">
                   <span className="text-studio-muted">Subtotal</span>
-                  <span className="font-mono font-medium text-white">₹{Math.round(subtotal)}</span>
+                  <span className="font-mono font-medium text-studio-charcoal">₹{Math.round(subtotal)}</span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-purple-400 font-medium">
@@ -270,9 +270,9 @@ export const CartDrawer: React.FC = () => {
                     {shippingFee === 0 ? <span className="text-emerald-400 font-bold">FREE</span> : `₹${Math.round(shippingFee)}`}
                   </span>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-studio-border text-sm font-bold text-white">
+                <div className="flex justify-between pt-2 border-t border-studio-border text-sm font-bold text-studio-charcoal">
                   <span>Estimated Total</span>
-                  <span className="font-mono text-base text-white">₹{Math.round(grandTotal)}</span>
+                  <span className="font-mono text-base text-studio-terracotta">₹{Math.round(grandTotal)}</span>
                 </div>
               </div>
 
@@ -283,10 +283,10 @@ export const CartDrawer: React.FC = () => {
                     closeCart();
                     navigate('checkout');
                   }}
-                  className="w-full bg-studio-terracotta text-black font-bold py-3.5 rounded-xl font-display text-sm uppercase tracking-wider hover:bg-purple-400 transition-colors shadow-md flex items-center justify-center gap-2 group"
+                  className="w-full bg-studio-terracotta text-white font-bold py-3.5 rounded-xl font-display text-sm uppercase tracking-wider hover:bg-studio-terracottaHover transition-colors shadow-md flex items-center justify-center gap-2 group"
                 >
-                  <span className="text-black font-bold">Checkout Now</span>
-                  <ArrowRight className="w-4 h-4 text-black group-hover:translate-x-1 transition-transform" />
+                  <span className="text-white font-bold">Checkout Now</span>
+                  <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
                 </button>
 
                 <button
@@ -294,7 +294,7 @@ export const CartDrawer: React.FC = () => {
                     closeCart();
                     navigate('cart');
                   }}
-                  className="w-full bg-studio-sand text-purple-200 border border-studio-border py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-studio-terracotta hover:text-black transition-colors text-center"
+                  className="w-full bg-studio-sand text-studio-charcoal border border-studio-border hover:border-studio-terracotta py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-studio-terracotta hover:text-white transition-colors text-center"
                 >
                   View Full Cart &amp; Details
                 </button>

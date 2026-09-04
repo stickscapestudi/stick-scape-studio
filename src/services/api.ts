@@ -20,6 +20,8 @@ export class ApiError extends Error {
 
 export interface ApiFetchOptions extends RequestInit {
   authenticated?: boolean;
+  adminAuth?: boolean;
+  customerAuth?: boolean;
 }
 
 /**
@@ -39,11 +41,27 @@ export async function apiFetch<T>(
     Accept: 'application/json',
   };
 
-  // Inject Bearer token if available
+  // Inject Bearer token
   try {
-    const token = localStorage.getItem('stick_scape_admin_token');
-    if (token) {
-      defaultHeaders['Authorization'] = `Bearer ${token}`;
+    const adminToken = localStorage.getItem('stick_scape_admin_token');
+    const customerToken = localStorage.getItem('stick_scape_customer_token');
+    
+    // Explicit admin endpoint or options.adminAuth -> prioritize adminToken
+    const isAdminEndpoint = 
+      options.adminAuth || 
+      cleanEndpoint.startsWith('/admin') || 
+      (cleanEndpoint.startsWith('/orders') && !cleanEndpoint.startsWith('/orders/track') && (options.method === 'GET' || options.method === 'PATCH'));
+
+    if (isAdminEndpoint && adminToken) {
+      defaultHeaders['Authorization'] = `Bearer ${adminToken}`;
+    } else if ((options.customerAuth || cleanEndpoint.startsWith('/auth/customer') || cleanEndpoint.startsWith('/users')) && customerToken) {
+      defaultHeaders['Authorization'] = `Bearer ${customerToken}`;
+    } else if (adminToken && !customerToken) {
+      defaultHeaders['Authorization'] = `Bearer ${adminToken}`;
+    } else if (customerToken) {
+      defaultHeaders['Authorization'] = `Bearer ${customerToken}`;
+    } else if (adminToken) {
+      defaultHeaders['Authorization'] = `Bearer ${adminToken}`;
     }
   } catch {
     // Storage access fallback
@@ -89,7 +107,12 @@ export async function apiFetch<T>(
   if (!response.ok) {
     // Dispatch custom event if 401 Unauthorized for token expiration handling
     if (response.status === 401 && typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('stick_scape_unauthorized'));
+      const isAdminEndpoint = cleanEndpoint.startsWith('/admin') || (cleanEndpoint.startsWith('/orders') && options.method === 'GET');
+      if (isAdminEndpoint) {
+        window.dispatchEvent(new CustomEvent('stick_scape_admin_unauthorized'));
+      } else {
+        window.dispatchEvent(new CustomEvent('stick_scape_customer_unauthorized'));
+      }
     }
 
     const errorMessage =

@@ -79,17 +79,52 @@ function normalizeOrder(raw: any): OrderConfirmationData {
       };
 
   const items = Array.isArray(raw.items)
-    ? raw.items.map((item: any) => ({
-        cartItemId: item.cartItemId || item.id || `${item.productId || 'item'}_sz`,
-        id: item.productId || item.id || 'prod-01',
-        name: item.productName || item.name || 'Art Print',
-        category: item.category || 'posters',
-        basePrice: Number(item.unitPrice || item.basePrice || 0),
-        unitPrice: Number(item.unitPrice || 0),
-        image: item.image || item.imageUrl || '/logo.jpeg',
-        selectedSize: item.selectedSize || { id: 'sz-default', name: 'Standard Scale', dimensions: '11x17 in', priceMultiplier: 1.0, inStock: true },
-        quantity: Number(item.quantity || 1),
-      }))
+    ? raw.items.map((item: any) => {
+        let uploadedPhotos: string[] = [];
+        let customCaption: string | undefined = undefined;
+        let songUrl: string | undefined = undefined;
+
+        // Try extracting from product description or item fields
+        if (Array.isArray(item.uploadedPhotos) && item.uploadedPhotos.length > 0) {
+          uploadedPhotos = item.uploadedPhotos;
+        } else if (Array.isArray(item.images) && item.images.length > 0) {
+          uploadedPhotos = item.images;
+        } else if (item.product?.description && typeof item.product.description === 'string' && item.product.description.startsWith('{')) {
+          try {
+            const parsed = JSON.parse(item.product.description);
+            if (Array.isArray(parsed.photos)) {
+              uploadedPhotos = parsed.photos;
+            }
+            if (parsed.caption) {
+              customCaption = parsed.caption;
+            } else if (parsed.title) {
+              customCaption = `${parsed.title}${parsed.subtitle ? ' — ' + parsed.subtitle : ''}`;
+            }
+            if (parsed.songUrl) songUrl = parsed.songUrl;
+          } catch {}
+        }
+
+        if (uploadedPhotos.length === 0) {
+          const fallbackImg = item.image || item.imageUrl || item.product?.imageUrl || '/logo.jpeg';
+          uploadedPhotos = [fallbackImg];
+        }
+
+        return {
+          cartItemId: item.cartItemId || item.id || `${item.productId || 'item'}_sz`,
+          id: item.productId || item.id || 'prod-01',
+          name: item.productName || item.name || 'Art Print',
+          category: item.category || item.product?.category || 'posters',
+          basePrice: Number(item.unitPrice || item.basePrice || 0),
+          unitPrice: Number(item.unitPrice || 0),
+          image: uploadedPhotos[0] || item.image || item.imageUrl || item.product?.imageUrl || '/logo.jpeg',
+          images: uploadedPhotos,
+          uploadedPhotos: uploadedPhotos,
+          customCaption: customCaption || item.customCaption,
+          songUrl: songUrl || item.songUrl,
+          selectedSize: item.selectedSize || { id: 'sz-default', name: 'Standard Scale', dimensions: '11x17 in', priceMultiplier: 1.0, inStock: true },
+          quantity: Number(item.quantity || 1),
+        };
+      })
     : [];
 
   return {
@@ -144,7 +179,7 @@ export const orderService = {
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/orders?${queryString}` : '/orders';
 
-    const res = await api.get<any>(endpoint, { authenticated: true });
+    const res = await api.get<any>(endpoint, { authenticated: true, adminAuth: true });
 
     let rawOrders: any[] = [];
     let pagination = {
@@ -178,6 +213,7 @@ export const orderService = {
   async getOrderById(orderId: string): Promise<OrderConfirmationData> {
     const res = await api.get<OrderResponse | OrderConfirmationData>(`/orders/${orderId}`, {
       authenticated: true,
+      adminAuth: true,
     });
     if (res && (res as OrderResponse).success && (res as OrderResponse).data) {
       return normalizeOrder((res as OrderResponse).data);
@@ -204,6 +240,14 @@ export const orderService = {
       items: payload.items.map((i) => ({
         productId: i.id || (i as any).productId || 'prod-01',
         quantity: i.quantity || 1,
+        productName: i.name || (i as any).productName,
+        unitPrice: i.unitPrice ?? i.basePrice,
+        imageUrl: i.image || (i as any).imageUrl,
+        images: i.images || (i as any).uploadedPhotos,
+        uploadedPhotos: i.uploadedPhotos || i.images,
+        customCaption: i.customCaption,
+        songUrl: i.songUrl,
+        description: i.customDescription || (i as any).description,
       })),
     };
 

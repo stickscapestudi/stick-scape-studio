@@ -4,6 +4,7 @@ import { WishlistProvider } from './context/WishlistContext';
 import { CartProvider } from './context/CartContext';
 import { NavigationProvider, useNavigation } from './context/NavigationContext';
 import { AuthProvider } from './context/AuthContext';
+import { CustomerAuthProvider } from './context/CustomerAuthContext';
 
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
@@ -22,6 +23,8 @@ import { ContactPage } from './pages/ContactPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 import { TrackOrderPage } from './pages/TrackOrderPage';
 import { AdminPage } from './pages/AdminPage';
+import { LoginPage } from './pages/LoginPage';
+import { AccountPage } from './pages/AccountPage';
 import { OrderNotificationModal } from './components/common/OrderNotificationModal';
 
 const AppContent: React.FC = () => {
@@ -82,6 +85,10 @@ const AppContent: React.FC = () => {
         return <OrderConfirmationPage />;
       case 'track-order':
         return <TrackOrderPage />;
+      case 'login':
+        return <LoginPage />;
+      case 'account':
+        return <AccountPage />;
       case 'admin':
         return <AdminPage />;
       default:
@@ -110,13 +117,15 @@ export function App() {
   return (
     <ToastProvider>
       <AuthProvider>
-        <WishlistProvider>
-          <CartProvider>
-            <NavigationProvider>
-              <AppContent />
-            </NavigationProvider>
-          </CartProvider>
-        </WishlistProvider>
+        <CustomerAuthProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <NavigationProvider>
+                <AppContent />
+              </NavigationProvider>
+            </CartProvider>
+          </WishlistProvider>
+        </CustomerAuthProvider>
       </AuthProvider>
     </ToastProvider>
   );

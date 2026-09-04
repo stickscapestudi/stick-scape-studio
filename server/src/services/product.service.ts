@@ -6,14 +6,15 @@ export const productService = {
   async getProducts(params?: { category?: string; search?: string }) {
     const where: any = { isActive: true };
 
-    if (params?.category && params.category !== 'All') {
-      where.category = { equals: params.category, mode: 'insensitive' };
+    if (params?.category && params.category.trim() !== '' && params.category.toLowerCase() !== 'all') {
+      where.category = { equals: params.category.trim(), mode: 'insensitive' };
     }
 
-    if (params?.search) {
+    if (params?.search && params.search.trim() !== '') {
+      const searchTrimmed = params.search.trim();
       where.OR = [
-        { name: { contains: params.search, mode: 'insensitive' } },
-        { description: { contains: params.search, mode: 'insensitive' } },
+        { name: { contains: searchTrimmed, mode: 'insensitive' } },
+        { description: { contains: searchTrimmed, mode: 'insensitive' } },
       ];
     }
 
@@ -23,13 +24,16 @@ export const productService = {
     });
   },
 
-  async getProductById(id: string) {
+  async getProductById(idOrSlug: string) {
     const product = await prisma.product.findFirst({
-      where: { id, isActive: true },
+      where: {
+        OR: [{ id: idOrSlug }, { slug: idOrSlug }],
+        isActive: true,
+      },
     });
 
     if (!product) {
-      throw new AppError(`Product with ID '${id}' not found`, 404);
+      throw new AppError(`Product with ID or slug '${idOrSlug}' not found`, 404);
     }
 
     return product;

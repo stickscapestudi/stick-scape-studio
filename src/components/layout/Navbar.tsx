@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigation, type PageRoute } from '../../context/NavigationContext';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
+import { useCustomerAuth } from '../../context/CustomerAuthContext';
 import { 
   ShoppingBag, 
   Heart, 
@@ -9,7 +10,12 @@ import {
   Menu, 
   X, 
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  User,
+  LogOut,
+  Package,
+  MapPin,
+  ShieldCheck,
 } from 'lucide-react';
 import { SAMPLE_PRODUCTS } from '../../data/products';
 
@@ -17,10 +23,12 @@ export const Navbar: React.FC = () => {
   const { currentPage, navigate } = useNavigation();
   const { totalItemsCount, openCart } = useCart();
   const { wishlistCount } = useWishlist();
+  const { customer, isLoggedIn, logout } = useCustomerAuth();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const navLinks: { label: string; page: PageRoute; params?: Record<string, string> }[] = [
     { label: 'Home', page: 'home' },
@@ -31,7 +39,6 @@ export const Navbar: React.FC = () => {
     { label: 'Track Order', page: 'track-order' },
     { label: 'About Studio', page: 'about' },
     { label: 'Contact', page: 'contact' },
-    { label: 'Admin', page: 'admin' },
   ];
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -60,25 +67,17 @@ export const Navbar: React.FC = () => {
           {/* Brand Logo (Far Left) */}
           <div 
             onClick={() => navigate('home')}
-            className="cursor-pointer flex items-center gap-3 group flex-shrink-0"
+            className="cursor-pointer flex items-center group flex-shrink-0 py-1"
           >
             <img 
-              src="/logo.jpeg" 
+              src="/logo-transparent.png" 
               alt="Stick Scape Studio" 
-              className="w-11 h-11 object-cover rounded-xl shadow-md border border-studio-border group-hover:border-studio-terracotta transition-colors duration-300"
+              className="h-11 sm:h-12 w-auto max-w-[190px] sm:max-w-[220px] object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_2px_12px_rgba(253,155,0,0.2)]"
             />
-            <div>
-              <span className="font-display font-black text-xl tracking-tight text-white uppercase group-hover:text-studio-terracotta transition-colors">
-                STICK SCAPE
-              </span>
-              <span className="block font-mono text-[10px] tracking-widest text-white uppercase -mt-1 font-bold">
-                STUDIO &bull; ART PRINTS
-              </span>
-            </div>
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-3.5 xl:gap-6 2xl:gap-8 flex-shrink-0">
             {navLinks.map((link) => {
               const isActive = 
                 currentPage === link.page && 
@@ -87,7 +86,7 @@ export const Navbar: React.FC = () => {
                 <button
                   key={link.label}
                   onClick={() => navigate(link.page, link.params)}
-                  className={`text-sm font-medium tracking-wide transition-colors duration-200 py-1 relative ${
+                  className={`text-xs xl:text-sm font-medium tracking-wide transition-colors duration-200 py-1 relative whitespace-nowrap flex-shrink-0 ${
                     isActive
                       ? 'text-studio-terracotta font-semibold'
                       : 'text-studio-charcoal hover:text-studio-terracotta'
@@ -103,12 +102,12 @@ export const Navbar: React.FC = () => {
           </nav>
 
           {/* Actions: Search, Wishlist, Bag, Mobile Menu */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 xl:gap-4 flex-shrink-0">
             
             {/* Search Trigger */}
             <button
               onClick={() => setSearchOpen(true)}
-              className="p-2 text-studio-charcoal hover:text-studio-terracotta hover:bg-studio-sand/50 rounded-full transition-colors"
+              className="p-2 text-studio-charcoal hover:text-studio-terracotta hover:bg-studio-sand/50 rounded-full transition-colors flex-shrink-0"
               aria-label="Search art and polaroids"
               title="Search art"
             >
@@ -118,7 +117,7 @@ export const Navbar: React.FC = () => {
             {/* Wishlist Button */}
             <button
               onClick={() => navigate('shop', { wishlist: 'true' })}
-              className="p-2 text-studio-charcoal hover:text-studio-terracotta hover:bg-studio-sand/50 rounded-full transition-colors relative"
+              className="p-2 text-studio-charcoal hover:text-studio-terracotta hover:bg-studio-sand/50 rounded-full transition-colors relative flex-shrink-0"
               aria-label={`Wishlist with ${wishlistCount} items`}
               title="Saved Favorites"
             >
@@ -130,15 +129,110 @@ export const Navbar: React.FC = () => {
               )}
             </button>
 
+            {/* User Account / Sign In Dropdown Button */}
+            <div className="relative flex-shrink-0">
+              {isLoggedIn && customer ? (
+                <button
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="flex items-center gap-2 p-1.5 rounded-full hover:bg-studio-sand/80 border border-transparent hover:border-studio-terracotta/40 transition-all flex-shrink-0"
+                  title="My Account"
+                >
+                  <div className="w-8 h-8 rounded-full bg-studio-terracotta flex items-center justify-center text-white text-xs font-display font-black shadow-sm">
+                    {customer.avatarUrl ? (
+                      <img
+                        src={customer.avatarUrl}
+                        alt={customer.name}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      customer.name.charAt(0).toUpperCase()
+                    )}
+                  </div>
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate('login')}
+                  className="hidden sm:flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider py-1.5 px-3.5 rounded-full bg-studio-sand hover:bg-studio-terracotta hover:text-white text-studio-charcoal border border-studio-border hover:border-studio-terracotta transition-all whitespace-nowrap flex-shrink-0"
+                  title="Sign In"
+                >
+                  <User className="w-3.5 h-3.5 text-studio-terracotta" />
+                  <span className="whitespace-nowrap">Sign In</span>
+                </button>
+              )}
+
+              {/* User Dropdown Menu */}
+              {userDropdownOpen && isLoggedIn && customer && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setUserDropdownOpen(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-56 bg-studio-card border border-studio-border rounded-2xl shadow-2xl p-2 z-50 animate-fadeIn space-y-1 text-xs font-mono">
+                    <div className="p-2.5 pb-2 border-b border-studio-border/70">
+                      <p className="font-bold text-white truncate">{customer.name}</p>
+                      <p className="text-[10px] text-purple-400 truncate">{customer.email}</p>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        navigate('account');
+                      }}
+                      className="w-full text-left p-2 rounded-xl hover:bg-studio-sand text-white hover:text-purple-300 flex items-center gap-2 transition-colors"
+                    >
+                      <MapPin className="w-4 h-4 text-purple-400" />
+                      <span>Saved Address</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        navigate('account');
+                      }}
+                      className="w-full text-left p-2 rounded-xl hover:bg-studio-sand text-white hover:text-purple-300 flex items-center gap-2 transition-colors"
+                    >
+                      <Package className="w-4 h-4 text-purple-400" />
+                      <span>My Orders</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        navigate('admin');
+                      }}
+                      className="w-full text-left p-2 rounded-xl hover:bg-purple-950/40 text-purple-300 hover:text-purple-200 flex items-center gap-2 transition-colors border-t border-studio-border/70 mt-1 pt-2"
+                    >
+                      <ShieldCheck className="w-4 h-4 text-studio-terracotta" />
+                      <span>Admin Portal</span>
+                    </button>
+
+                    <div className="border-t border-studio-border/70 pt-1">
+                      <button
+                        onClick={() => {
+                          setUserDropdownOpen(false);
+                          logout();
+                          navigate('home');
+                        }}
+                        className="w-full text-left p-2 rounded-xl hover:bg-red-950/40 text-red-400 hover:text-red-300 flex items-center gap-2 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
             {/* Cart Bag Trigger */}
             <button
               onClick={openCart}
-              className="flex items-center gap-2 bg-studio-terracotta text-black px-4 py-2.5 rounded-full hover:bg-purple-400 transition-colors shadow-md duration-300 font-bold group"
+              className="flex items-center gap-2 bg-studio-terracotta text-white px-4 py-2.5 rounded-full hover:bg-studio-terracottaHover transition-colors shadow-md duration-300 font-bold group whitespace-nowrap flex-shrink-0"
               aria-label={`Shopping bag with ${totalItemsCount} items`}
             >
-              <ShoppingBag className="w-4 h-4 text-black group-hover:scale-110 transition-transform" />
-              <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline text-black">Bag</span>
-              <span className="bg-black/20 text-black font-mono text-xs px-2 py-0.5 rounded-full font-black">
+              <ShoppingBag className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
+              <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline text-white whitespace-nowrap">Bag</span>
+              <span className="bg-black/30 text-white font-mono text-xs px-2 py-0.5 rounded-full font-black">
                 {totalItemsCount}
               </span>
             </button>
@@ -146,7 +240,7 @@ export const Navbar: React.FC = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="p-2 text-white hover:text-studio-terracotta rounded-lg focus:outline-none lg:hidden"
+              className="p-2 text-studio-charcoal hover:text-studio-terracotta rounded-lg focus:outline-none lg:hidden flex-shrink-0"
               aria-label="Open mobile menu"
             >
               <Menu className="w-6 h-6" />
@@ -158,7 +252,7 @@ export const Navbar: React.FC = () => {
 
       {/* Search Overlay Modal */}
       {searchOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-start justify-center pt-20 px-4 animate-fadeIn">
+        <div className="fixed inset-0 z-50 bg-studio-dark/80 backdrop-blur-md flex items-start justify-center pt-20 px-4 animate-fadeIn">
           <div className="bg-studio-card w-full max-w-2xl rounded-2xl shadow-2xl border border-studio-border p-6 overflow-hidden">
             
             <div className="flex items-center justify-between pb-4 border-b border-studio-border">
@@ -167,7 +261,7 @@ export const Navbar: React.FC = () => {
               </div>
               <button
                 onClick={() => setSearchOpen(false)}
-                className="p-1 text-studio-muted hover:text-white rounded-lg"
+                className="p-1 text-studio-muted hover:text-studio-charcoal rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -180,12 +274,12 @@ export const Navbar: React.FC = () => {
                 placeholder="Search by aesthetic, title, anime, botanical, polaroids..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-studio-sand border border-studio-border rounded-xl px-12 py-3.5 text-sm text-white focus:outline-none focus:border-studio-terracotta focus:ring-1 focus:ring-studio-terracotta placeholder:text-neutral-500"
+                className="w-full bg-studio-sand border border-studio-border rounded-xl px-12 py-3.5 text-sm text-studio-charcoal focus:outline-none focus:border-studio-terracotta focus:ring-1 focus:ring-studio-terracotta placeholder:text-studio-muted/60"
               />
               <Search className="w-5 h-5 text-studio-muted absolute left-4 top-4" />
               <button
                 type="submit"
-                className="absolute right-2.5 top-2.5 bg-studio-terracotta text-black font-bold px-4 py-1.5 rounded-lg text-xs hover:bg-purple-400 transition-colors"
+                className="absolute right-2.5 top-2.5 bg-studio-terracotta text-white font-bold px-4 py-1.5 rounded-lg text-xs hover:bg-studio-terracottaHover transition-colors"
               >
                 Search
               </button>
@@ -208,8 +302,8 @@ export const Navbar: React.FC = () => {
                     <div className="flex items-center gap-3">
                       <img src={prod.images[0]} alt={prod.name} className="w-10 h-10 object-cover rounded-md" />
                       <div>
-                        <h5 className="text-sm font-semibold text-studio-dark">{prod.name}</h5>
-                        <span className="text-xs text-studio-muted capitalize">{prod.category} &bull; ${prod.price.toFixed(2)}</span>
+                        <h5 className="text-sm font-semibold text-studio-charcoal">{prod.name}</h5>
+                        <span className="text-xs text-purple-400 capitalize">{prod.category} &bull; ₹{Math.round(prod.price)}</span>
                       </div>
                     </div>
                     <ArrowRight className="w-4 h-4 text-studio-muted" />
@@ -229,7 +323,7 @@ export const Navbar: React.FC = () => {
                       navigate('shop', { search: term });
                       setSearchOpen(false);
                     }}
-                    className="text-xs bg-studio-sand hover:bg-studio-terracotta hover:text-black font-semibold px-3 py-1.5 rounded-full transition-colors text-purple-200 border border-studio-border"
+                    className="text-xs bg-studio-sand hover:bg-studio-terracotta hover:text-white font-semibold px-3 py-1.5 rounded-full transition-colors text-purple-200 border border-studio-border"
                   >
                     {term}
                   </button>
@@ -251,19 +345,22 @@ export const Navbar: React.FC = () => {
           <div className="fixed top-0 left-0 bottom-0 w-4/5 max-w-sm bg-studio-card border-r border-studio-border p-6 flex flex-col justify-between shadow-2xl animate-fadeIn">
             <div>
               <div className="flex items-center justify-between pb-6 border-b border-studio-border">
-                <div className="flex items-center gap-2.5">
+                <div 
+                  onClick={() => {
+                    navigate('home');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="cursor-pointer flex items-center"
+                >
                   <img 
-                    src="/logo.jpeg" 
+                    src="/logo-transparent.png" 
                     alt="Stick Scape Studio" 
-                    className="w-9 h-9 object-cover rounded-lg shadow-sm border border-studio-border"
+                    className="h-10 w-auto max-w-[160px] object-contain drop-shadow-[0_2px_8px_rgba(253,155,0,0.2)]"
                   />
-                  <span className="font-display font-black text-lg tracking-tight uppercase">
-                    STICK SCAPE
-                  </span>
                 </div>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-1.5 text-studio-muted hover:text-studio-dark rounded-lg"
+                  className="p-1.5 text-studio-muted hover:text-studio-charcoal rounded-lg"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -277,7 +374,7 @@ export const Navbar: React.FC = () => {
                       navigate(link.page, link.params);
                       setMobileMenuOpen(false);
                     }}
-                    className="text-left font-display font-bold text-xl text-studio-dark hover:text-studio-terracotta transition-colors py-1 flex items-center justify-between"
+                    className="text-left font-display font-bold text-xl text-studio-charcoal hover:text-studio-terracotta transition-colors py-1 flex items-center justify-between"
                   >
                     <span>{link.label}</span>
                     <ArrowRight className="w-4 h-4 text-studio-muted" />
@@ -286,16 +383,80 @@ export const Navbar: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-6 border-t border-studio-border">
+            <div className="pt-6 border-t border-studio-border space-y-3">
+              {isLoggedIn && customer ? (
+                <div className="p-3 rounded-2xl bg-studio-sand/80 border border-purple-500/30 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-studio-terracotta flex items-center justify-center text-white text-xs font-display font-black">
+                      {customer.avatarUrl ? (
+                        <img
+                          src={customer.avatarUrl}
+                          alt={customer.name}
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      ) : (
+                        customer.name.charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    <div className="text-xs font-mono">
+                      <p className="font-bold text-white truncate max-w-[120px]">{customer.name}</p>
+                      <button
+                        onClick={() => {
+                          navigate('account');
+                          setMobileMenuOpen(false);
+                        }}
+                        className="text-[11px] text-purple-400 hover:underline"
+                      >
+                        View Account &bull;
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      logout();
+                      setMobileMenuOpen(false);
+                      navigate('home');
+                    }}
+                    className="p-1.5 text-studio-muted hover:text-red-400"
+                    title="Sign Out"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    navigate('login');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2.5 px-4 rounded-xl bg-studio-terracotta hover:bg-studio-terracottaHover text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md"
+                >
+                  <User className="w-4 h-4 text-white" />
+                  <span>Customer Sign In / Join</span>
+                </button>
+              )}
+
               <button
                 onClick={() => {
                   navigate('shop', { wishlist: 'true' });
                   setMobileMenuOpen(false);
                 }}
-                className="w-full py-2.5 px-4 mb-3 rounded-xl bg-studio-sand flex items-center justify-between text-sm font-semibold text-studio-charcoal"
+                className="w-full py-2.5 px-4 rounded-xl bg-studio-sand flex items-center justify-between text-sm font-semibold text-studio-charcoal hover:border-studio-terracotta/40 border border-studio-border"
               >
                 <span className="flex items-center gap-2"><Heart className="w-4 h-4 text-studio-terracotta" /> Saved Favorites</span>
-                <span className="font-mono text-xs bg-studio-terracotta text-black font-bold px-2 py-0.5 rounded-full">{wishlistCount}</span>
+                <span className="font-mono text-xs bg-studio-terracotta text-white font-bold px-2 py-0.5 rounded-full">{wishlistCount}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  navigate('admin');
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-purple-950/40 hover:bg-purple-900 border border-purple-500/30 flex items-center justify-between text-xs font-mono text-purple-300 hover:text-white transition-colors"
+              >
+                <span className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-studio-terracotta" /> Admin Management Hub</span>
+                <span>&rarr;</span>
               </button>
               
               <div className="text-xs text-studio-muted font-mono leading-relaxed">

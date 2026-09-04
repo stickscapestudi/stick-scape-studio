@@ -11,5 +11,12 @@ export const verifyPaymentSchema = z.object({
   signature: z.string().min(1, 'Signature is required'),
 });
 
+export const verifyUpiPaymentSchema = z.object({
+  orderNumber: z.string().min(1, 'Order number is required'),
+  utrNumber: z.string().optional(),
+  upiId: z.string().optional(),
+});
+
 export type CreatePaymentOrderInput = z.infer<typeof createPaymentOrderSchema>;
 export type VerifyPaymentInput = z.infer<typeof verifyPaymentSchema>;
+export type VerifyUpiPaymentInput = z.infer<typeof verifyUpiPaymentSchema>;

@@ -42,8 +42,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       logout();
     };
 
-    window.addEventListener('stick_scape_unauthorized', handleUnauthorized);
-    return () => window.removeEventListener('stick_scape_unauthorized', handleUnauthorized);
+    window.addEventListener('stick_scape_admin_unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('stick_scape_admin_unauthorized', handleUnauthorized);
   }, []);
 
   return (

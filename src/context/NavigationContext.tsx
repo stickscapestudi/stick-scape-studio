@@ -13,6 +13,8 @@ export type PageRoute =
   | 'contact'
   | 'order-confirmation'
   | 'track-order'
+  | 'login'
+  | 'account'
   | 'admin';
 
 interface NavigationContextType {
@@ -31,28 +33,60 @@ const NavigationContext = createContext<NavigationContextType | undefined>(undef
 export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const parseRoute = (): { page: PageRoute; params: Record<string, string> } => {
     try {
-      const hash = window.location.hash.replace(/^#\/?/, '');
-      const [pathPart, queryPart] = hash.split('?');
-      
+      if (typeof window === 'undefined') {
+        return { page: 'home', params: {} };
+      }
+
       const queryParams: Record<string, string> = {};
-      if (queryPart) {
-        const searchParams = new URLSearchParams(queryPart);
+
+      // 1. Parse standard URL search parameters (?param=value)
+      if (window.location.search) {
+        const searchParams = new URLSearchParams(window.location.search);
         searchParams.forEach((val, key) => {
           queryParams[key] = val;
         });
       }
 
-      const segments = pathPart.split('/').filter(Boolean);
-      const pageSegment = segments[0] || 'home';
+      // 2. Parse direct pathname (e.g., /admin, /shop, /product/prod-01)
+      const pathname = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+      const pathSegments = pathname ? pathname.split('/').filter(Boolean) : [];
 
-      if (pageSegment === 'product' && segments[1]) {
-        queryParams.id = segments[1];
+      // 3. Parse hash routing (e.g., #/admin or #admin)
+      const hash = window.location.hash.replace(/^#\/?/, '');
+      const [hashPath, hashQuery] = hash.split('?');
+      if (hashQuery) {
+        const hashSearchParams = new URLSearchParams(hashQuery);
+        hashSearchParams.forEach((val, key) => {
+          queryParams[key] = val;
+        });
+      }
+      const hashSegments = hashPath ? hashPath.toLowerCase().split('/').filter(Boolean) : [];
+
+      // Special priority for Admin: /admin, /admin/, #/admin, #admin, ?page=admin, ?route=admin, ?admin=true
+      if (
+        pathname === 'admin' ||
+        pathname.startsWith('admin/') ||
+        hashSegments[0] === 'admin' ||
+        queryParams.page === 'admin' ||
+        queryParams.route === 'admin' ||
+        queryParams.admin === 'true'
+      ) {
+        return { page: 'admin', params: queryParams };
+      }
+
+      // Determine active path segments (hash takes priority if explicitly set, otherwise pathname)
+      const activeSegments = hashSegments.length > 0 ? hashSegments : pathSegments;
+      const pageSegment = activeSegments[0] || 'home';
+
+      if (pageSegment === 'product' && activeSegments[1]) {
+        queryParams.id = activeSegments[1];
         return { page: 'product', params: queryParams };
       }
 
       const validPages: PageRoute[] = [
         'home', 'shop', 'posters', 'polaroids', 'product',
-        'cart', 'checkout', 'about', 'contact', 'order-confirmation', 'track-order', 'admin'
+        'cart', 'checkout', 'about', 'contact', 'order-confirmation', 'track-order',
+        'login', 'account', 'admin'
       ];
 
       if (validPages.includes(pageSegment as PageRoute)) {
@@ -109,22 +143,26 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
     }
   };
 
-  // Sync state on hash change (browser back/forward button)
+  // Sync state on history change (browser back/forward button, URL change)
   useEffect(() => {
-    const handlePopState = () => {
+    const handleLocationChange = () => {
       const route = parseRoute();
       changeRouteState(route.page, route.params);
     };
 
-    window.addEventListener('hashchange', handlePopState);
-    return () => window.removeEventListener('hashchange', handlePopState);
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
   }, []);
 
   const navigate = (page: PageRoute, newParams: Record<string, string> = {}) => {
     changeRouteState(page, newParams);
 
-    // Build URL hash
-    let hashUrl = `#/${page}`;
+    // Build URL hash and history state
+    let hashUrl = `#/${page === 'home' ? '' : page}`;
     if (page === 'product' && newParams.id) {
       hashUrl = `#/${page}/${newParams.id}`;
     }
@@ -138,6 +176,15 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
     const queryString = searchParams.toString();
     if (queryString) {
       hashUrl += `?${queryString}`;
+    }
+
+    // Safely update history and hash
+    try {
+      const pathname = page === 'home' ? '/' : `/${page}`;
+      const pathWithQuery = queryString ? `${pathname}?${queryString}` : pathname;
+      window.history.pushState({ page, params: newParams }, '', pathWithQuery);
+    } catch {
+      // Fallback
     }
 
     window.location.hash = hashUrl;

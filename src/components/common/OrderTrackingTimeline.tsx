@@ -46,19 +46,19 @@ export const OrderTrackingTimeline: React.FC<OrderTrackingTimelineProps> = ({ st
               key={step.key}
               className={`p-4 rounded-2xl border transition-all flex sm:flex-col items-center sm:text-center gap-3.5 ${
                 isCurrent
-                  ? 'bg-purple-950/90 border-studio-terracotta shadow-lg shadow-purple-950/50'
+                  ? 'bg-studio-sand border-studio-terracotta shadow-[0_0_15px_rgba(147,51,234,0.15)]'
                   : isCompleted
-                  ? 'bg-studio-card/80 border-emerald-500/40 opacity-90'
-                  : 'bg-studio-card/40 border-studio-border/50 opacity-50'
+                  ? 'bg-studio-card border-emerald-500/50 opacity-90'
+                  : 'bg-studio-card/40 border-studio-border opacity-50'
               }`}
             >
               <div
                 className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border font-mono ${
                   isCurrent
-                    ? 'bg-studio-terracotta text-black border-studio-terracotta font-bold animate-pulse'
+                    ? 'bg-studio-terracotta text-white border-studio-terracotta font-black animate-pulse'
                     : isCompleted
                     ? 'bg-emerald-950 text-emerald-400 border-emerald-500/50'
-                    : 'bg-studio-sand text-neutral-400 border-studio-border'
+                    : 'bg-studio-sand text-studio-muted border-studio-border'
                 }`}
               >
                 {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
@@ -66,7 +66,7 @@ export const OrderTrackingTimeline: React.FC<OrderTrackingTimelineProps> = ({ st
 
               <div>
                 <div className="flex items-center sm:justify-center gap-1.5 font-bold text-xs">
-                  <span className={isCurrent ? 'text-white' : isCompleted ? 'text-emerald-300' : 'text-neutral-400'}>
+                  <span className={isCurrent ? 'text-purple-300 font-bold' : isCompleted ? 'text-emerald-400' : 'text-studio-muted'}>
                     {step.label}
                   </span>
                   {isCurrent && (

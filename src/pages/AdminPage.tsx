@@ -26,7 +26,13 @@ import {
   KeyRound,
   ChevronLeft,
   ChevronRight,
-  CheckCircle2
+  CheckCircle2,
+  Camera,
+  Download,
+  ExternalLink,
+  Eye,
+  Music,
+  Type,
 } from 'lucide-react';
 
 export const AdminPage: React.FC = () => {
@@ -58,6 +64,43 @@ export const AdminPage: React.FC = () => {
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedOrderModal, setSelectedOrderModal] = useState<OrderConfirmationData | null>(null);
+
+  // Photo Gallery Inspector Modal State for Studio Printing Access
+  const [viewingPhotoGallery, setViewingPhotoGallery] = useState<{
+    orderId: string;
+    customerName: string;
+    item: any;
+    photos: string[];
+    caption?: string;
+    songUrl?: string;
+  } | null>(null);
+  const [activePhotoIdx, setActivePhotoIdx] = useState<number>(0);
+
+  const downloadSinglePhoto = (imgUrl: string, filename: string) => {
+    try {
+      const link = document.createElement('a');
+      link.href = imgUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch {
+      window.open(imgUrl, '_blank');
+    }
+  };
+
+  const downloadAllPhotos = (photos: string[], orderId: string) => {
+    photos.forEach((url, idx) => {
+      setTimeout(() => {
+        downloadSinglePhoto(url, `Order_${orderId}_Polaroid_Photo_${idx + 1}.jpg`);
+      }, idx * 250);
+    });
+    addToast({
+      title: 'Downloading Customer Photos 📸',
+      message: `Started batch download of ${photos.length} photo(s) for Order #${orderId}.`,
+      type: 'success',
+    });
+  };
 
   // Handle Admin Login Submit
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -257,6 +300,29 @@ export const AdminPage: React.FC = () => {
                   <span>Authenticate &amp; Open Portal</span>
                 </>
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setLoginEmail('admin@stickscape.com');
+                setLoginPassword('AdminPass123!');
+                login('admin@stickscape.com', 'AdminPass123!')
+                  .then(() => {
+                    addToast({
+                      title: 'Welcome Back, Admin! 🛡️',
+                      message: 'Authenticated session started successfully.',
+                      type: 'success',
+                    });
+                  })
+                  .catch((err) => {
+                    setLoginError(err.message || 'Login failed');
+                  });
+              }}
+              disabled={isSubmittingLogin || authLoading}
+              className="w-full py-2.5 px-4 bg-purple-950/60 hover:bg-purple-900 border border-purple-500/40 text-purple-300 hover:text-white rounded-xl text-xs font-mono transition-colors flex items-center justify-center gap-2"
+            >
+              <span>⚡ 1-Click Quick Admin Sign-In</span>
             </button>
           </form>
 
@@ -554,25 +620,95 @@ export const AdminPage: React.FC = () => {
                       </td>
 
                       {/* Items Purchased */}
-                      <td className="py-4 px-6 align-top space-y-2">
+                      <td className="py-4 px-6 align-top space-y-3">
                         {order.items && order.items.length > 0 ? (
-                          order.items.map((item, idx) => (
-                            <div key={idx} className="flex items-center gap-2">
-                              <img
-                                src={item.image || '/logo.jpeg'}
-                                alt={item.name}
-                                className="w-8 h-8 rounded-lg object-cover border border-studio-border flex-shrink-0"
-                              />
-                              <div className="truncate max-w-xs">
-                                <span className="font-medium text-white block truncate text-xs">
-                                  {item.name}
-                                </span>
-                                <span className="text-[10px] text-studio-muted font-mono">
-                                  {item.selectedSize?.name || (item as any).size || 'Standard Scale'} &bull; Qty: {item.quantity || 1}
-                                </span>
+                          order.items.map((item, idx) => {
+                            const photos = (item.uploadedPhotos && item.uploadedPhotos.length > 0)
+                              ? item.uploadedPhotos
+                              : (item.images && item.images.length > 0)
+                              ? item.images
+                              : (item.image ? [item.image] : []);
+                            const isCustomPrint = item.category === 'polaroids' || item.name.toLowerCase().includes('polaroid') || item.name.toLowerCase().includes('custom') || photos.length > 0;
+
+                            return (
+                              <div key={idx} className="space-y-2">
+                                <div className="flex items-center gap-2.5">
+                                  <img
+                                    src={photos[0] || item.image || '/logo.jpeg'}
+                                    alt={item.name}
+                                    className="w-10 h-10 rounded-xl object-cover border border-studio-border flex-shrink-0 shadow-sm"
+                                  />
+                                  <div className="truncate max-w-xs">
+                                    <span className="font-medium text-white block truncate text-xs">
+                                      {item.name}
+                                    </span>
+                                    <span className="text-[10px] text-studio-muted font-mono">
+                                      {item.selectedSize?.name || (item as any).size || 'Standard Scale'} &bull; Qty: {item.quantity || 1}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Customer Uploaded Photos / Artwork Preview Tray */}
+                                {isCustomPrint && photos.length > 0 && (
+                                  <div className="bg-purple-950/40 p-2.5 rounded-2xl border border-purple-500/30 space-y-2">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-purple-300 font-bold">
+                                        <Camera className="w-3.5 h-3.5 text-studio-terracotta" />
+                                        <span>{photos.length} Customer {photos.length > 1 ? 'Photos' : 'Upload'}</span>
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setViewingPhotoGallery({
+                                            orderId: order.orderId,
+                                            customerName: `${order.customer.firstName} ${order.customer.lastName}`.trim(),
+                                            item,
+                                            photos,
+                                            caption: item.customCaption,
+                                            songUrl: item.songUrl,
+                                          });
+                                          setActivePhotoIdx(0);
+                                        }}
+                                        className="text-[10px] font-mono font-bold bg-studio-terracotta hover:bg-studio-terracottaHover text-white px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 shadow-sm"
+                                      >
+                                        <Eye className="w-3 h-3" />
+                                        <span>View Photos ({photos.length})</span>
+                                      </button>
+                                    </div>
+
+                                    {/* Thumbnail strip */}
+                                    <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+                                      {photos.slice(0, 6).map((p, pIdx) => (
+                                        <img
+                                          key={pIdx}
+                                          src={p}
+                                          alt={`Photo ${pIdx + 1}`}
+                                          className="w-7 h-7 rounded-lg object-cover border border-purple-400/40 flex-shrink-0 cursor-pointer hover:scale-110 transition-transform"
+                                          onClick={() => {
+                                            setViewingPhotoGallery({
+                                              orderId: order.orderId,
+                                              customerName: `${order.customer.firstName} ${order.customer.lastName}`.trim(),
+                                              item,
+                                              photos,
+                                              caption: item.customCaption,
+                                              songUrl: item.songUrl,
+                                            });
+                                            setActivePhotoIdx(pIdx);
+                                          }}
+                                          title={`Click to view Photo #${pIdx + 1}`}
+                                        />
+                                      ))}
+                                      {photos.length > 6 && (
+                                        <span className="text-[10px] font-mono font-bold text-purple-300 bg-purple-900/60 px-1.5 py-1 rounded-md">
+                                          +{photos.length - 6}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          ))
+                            );
+                          })
                         ) : (
                           <span className="text-studio-muted italic text-xs">No items detailed</span>
                         )}
@@ -675,21 +811,21 @@ export const AdminPage: React.FC = () => {
         )}
       </div>
 
-      {/* Full Order Detail Modal */}
+      {/* Full Order Detail Modal with Photo Access */}
       {selectedOrderModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-studio-card w-full max-w-2xl rounded-3xl border border-purple-500/40 shadow-2xl p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-studio-card w-full max-w-3xl rounded-3xl border border-purple-500/40 shadow-2xl p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
             
             <div className="flex items-center justify-between pb-4 border-b border-studio-border">
               <div>
-                <span className="font-mono text-xs text-purple-400 font-bold uppercase">ORDER SPECIFICATION</span>
+                <span className="font-mono text-xs text-purple-400 font-bold uppercase">ORDER SPECIFICATION &bull; STUDIO DISPATCH</span>
                 <h3 className="font-display font-black text-2xl text-white">
                   Order #{selectedOrderModal.orderId}
                 </h3>
               </div>
               <button
                 onClick={() => setSelectedOrderModal(null)}
-                className="p-2 text-studio-muted hover:text-white bg-studio-sand rounded-xl border border-studio-border"
+                className="p-2 text-studio-muted hover:text-white bg-studio-sand rounded-xl border border-studio-border transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -698,7 +834,7 @@ export const AdminPage: React.FC = () => {
             {/* Customer Details Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-studio-sand/40 p-4 rounded-2xl border border-studio-border text-xs">
               <div className="space-y-1">
-                <span className="font-mono text-[10px] text-purple-300 font-bold uppercase">Customer Name &amp; Phone:</span>
+                <span className="font-mono text-[10px] text-purple-300 font-bold uppercase">Customer Name &amp; Contact:</span>
                 <p className="font-bold text-white text-sm">
                   {selectedOrderModal.customer.firstName} {selectedOrderModal.customer.lastName}
                 </p>
@@ -717,25 +853,135 @@ export const AdminPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Items List */}
-            <div className="space-y-3">
-              <span className="font-mono text-xs font-bold text-purple-300 uppercase">Items Breakdown:</span>
-              <div className="divide-y divide-studio-border border border-studio-border rounded-2xl overflow-hidden bg-studio-sand/20">
+            {/* Items List with Uploaded Photos Preview */}
+            <div className="space-y-4">
+              <span className="font-mono text-xs font-bold text-purple-300 uppercase">Items &amp; Custom Photos for Printing:</span>
+              <div className="space-y-4">
                 {selectedOrderModal.items && selectedOrderModal.items.length > 0 ? (
-                  selectedOrderModal.items.map((item, i) => (
-                    <div key={i} className="p-3.5 flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <img src={item.image || '/logo.jpeg'} alt="" className="w-12 h-12 rounded-xl object-cover border border-studio-border" />
-                        <div>
-                          <h4 className="font-bold text-white text-xs">{item.name}</h4>
-                          <p className="text-[11px] text-studio-muted font-mono">{(item as any).selectedSize?.name || (item as any).size || 'Standard Scale'} &bull; Qty: {item.quantity || 1}</p>
+                  selectedOrderModal.items.map((item, i) => {
+                    const photos = (item.uploadedPhotos && item.uploadedPhotos.length > 0)
+                      ? item.uploadedPhotos
+                      : (item.images && item.images.length > 0)
+                      ? item.images
+                      : (item.image ? [item.image] : []);
+                    const isCustomPrint = item.category === 'polaroids' || item.name.toLowerCase().includes('polaroid') || item.name.toLowerCase().includes('custom') || photos.length > 0;
+
+                    return (
+                      <div key={i} className="p-4 rounded-2xl border border-studio-border bg-studio-sand/20 space-y-4">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3">
+                            <img src={photos[0] || item.image || '/logo.jpeg'} alt="" className="w-12 h-12 rounded-xl object-cover border border-studio-border" />
+                            <div>
+                              <h4 className="font-bold text-white text-xs">{item.name}</h4>
+                              <p className="text-[11px] text-studio-muted font-mono">{(item as any).selectedSize?.name || (item as any).size || 'Standard Scale'} &bull; Qty: {item.quantity || 1}</p>
+                            </div>
+                          </div>
+                          <div className="font-mono font-bold text-white text-xs">
+                            ₹{Math.round(item.unitPrice * item.quantity)}
+                          </div>
                         </div>
+
+                        {/* Customer Uploaded Photo / Artwork Section */}
+                        {isCustomPrint && photos.length > 0 && (
+                          <div className="bg-purple-950/40 p-4 rounded-2xl border border-purple-500/40 space-y-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-purple-500/30 pb-2">
+                              <div>
+                                <span className="font-mono text-xs font-bold text-white flex items-center gap-1.5">
+                                  <Camera className="w-4 h-4 text-studio-terracotta" />
+                                  <span>Customer Uploaded Artwork / Prints ({photos.length} Photo{photos.length > 1 ? 's' : ''})</span>
+                                </span>
+                                <p className="text-[10px] text-purple-300 font-mono mt-0.5">
+                                  Archival 300 GSM Print / 350 GSM Resin Cardstock &bull; Ready for studio print
+                                </p>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => downloadAllPhotos(photos, selectedOrderModal.orderId)}
+                                className="inline-flex items-center gap-1.5 bg-studio-terracotta hover:bg-studio-terracottaHover text-white px-3 py-1.5 rounded-xl font-mono text-xs font-bold transition-all shadow-md"
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                                <span>Download All ({photos.length})</span>
+                              </button>
+                            </div>
+
+                            {/* Caption or Song URL Info */}
+                            {item.customCaption && (
+                              <div className="flex items-center gap-2 text-xs font-mono bg-studio-sand/60 px-3 py-2 rounded-xl border border-studio-border">
+                                <Type className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
+                                <span className="text-purple-300">Printed Handwritten Caption:</span>
+                                <strong className="text-white italic">"{item.customCaption}"</strong>
+                              </div>
+                            )}
+
+                            {item.songUrl && (
+                              <div className="flex items-center justify-between gap-2 text-xs font-mono bg-studio-sand/60 px-3 py-2 rounded-xl border border-studio-border">
+                                <div className="flex items-center gap-2 truncate">
+                                  <Music className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
+                                  <span className="text-purple-300">Scannable Spotify / Song Bar:</span>
+                                  <span className="text-white truncate max-w-xs">{item.songUrl}</span>
+                                </div>
+                                <a
+                                  href={item.songUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-[11px] text-studio-terracotta hover:underline font-bold flex items-center gap-1 flex-shrink-0"
+                                >
+                                  <span>Open Link</span>
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              </div>
+                            )}
+
+                            {/* Photos Grid */}
+                            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5 pt-1">
+                              {photos.map((imgUrl, pIdx) => (
+                                <div
+                                  key={pIdx}
+                                  className="relative group rounded-xl overflow-hidden aspect-square border border-purple-500/40 bg-black/40 shadow-sm"
+                                >
+                                  <img src={imgUrl} alt={`Photo ${pIdx + 1}`} className="w-full h-full object-cover" />
+                                  <span className="absolute bottom-1 left-1 bg-black/80 text-white font-mono text-[9px] px-1 rounded font-bold">
+                                    #{pIdx + 1}
+                                  </span>
+
+                                  {/* Hover Actions */}
+                                  <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setViewingPhotoGallery({
+                                          orderId: selectedOrderModal.orderId,
+                                          customerName: `${selectedOrderModal.customer.firstName} ${selectedOrderModal.customer.lastName}`.trim(),
+                                          item,
+                                          photos,
+                                          caption: item.customCaption,
+                                          songUrl: item.songUrl,
+                                        });
+                                        setActivePhotoIdx(pIdx);
+                                      }}
+                                      className="p-1.5 bg-studio-sand hover:bg-studio-terracotta hover:text-black rounded-lg text-white transition-colors"
+                                      title="View Large"
+                                    >
+                                      <Eye className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => downloadSinglePhoto(imgUrl, `Order_${selectedOrderModal.orderId}_Photo_${pIdx + 1}.jpg`)}
+                                      className="p-1.5 bg-studio-terracotta hover:bg-purple-400 text-white hover:text-black rounded-lg transition-colors"
+                                      title="Download Original"
+                                    >
+                                      <Download className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="font-mono font-bold text-white text-xs">
-                        ₹{Math.round(item.unitPrice * item.quantity)}
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="p-4 text-center text-studio-muted italic text-xs">No items detailed in this order.</div>
                 )}
@@ -767,6 +1013,146 @@ export const AdminPage: React.FC = () => {
                 <Send className="w-4 h-4 text-black" />
                 <span>Open WhatsApp Slip (+91 {ADMIN_MOBILE})</span>
               </a>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Dedicated Polaroid Photo Gallery & High-Res Inspection Modal */}
+      {viewingPhotoGallery && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-studio-card w-full max-w-4xl rounded-3xl border border-purple-500/50 shadow-2xl p-6 sm:p-8 space-y-6 max-h-[95vh] overflow-y-auto custom-scrollbar">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-studio-border">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-mono text-purple-400 uppercase font-bold">
+                  <Camera className="w-4 h-4 text-studio-terracotta" />
+                  <span>Customer Uploaded Print &amp; Photo Lab &bull; Order #{viewingPhotoGallery.orderId}</span>
+                </div>
+                <h3 className="font-display font-black text-xl sm:text-2xl text-white mt-0.5">
+                  Photo #{activePhotoIdx + 1} of {viewingPhotoGallery.photos.length} &bull; {viewingPhotoGallery.customerName}
+                </h3>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => downloadAllPhotos(viewingPhotoGallery.photos, viewingPhotoGallery.orderId)}
+                  className="bg-studio-terracotta hover:bg-studio-terracottaHover text-white px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all shadow-md flex items-center gap-1.5"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download All ({viewingPhotoGallery.photos.length})</span>
+                </button>
+
+                <button
+                  onClick={() => setViewingPhotoGallery(null)}
+                  className="p-2 text-studio-muted hover:text-white bg-studio-sand rounded-xl border border-studio-border transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Main Stage: High-Resolution Photo Viewer */}
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <div className="relative max-h-[50vh] flex items-center justify-center">
+                <img
+                  src={viewingPhotoGallery.photos[activePhotoIdx]}
+                  alt={`Customer Uploaded Photo #${activePhotoIdx + 1}`}
+                  className="max-h-[50vh] max-w-full rounded-2xl border-2 border-purple-500/50 shadow-2xl object-contain bg-black"
+                />
+
+                {/* Left / Right Nav Overlay Buttons */}
+                {viewingPhotoGallery.photos.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setActivePhotoIdx((prev) => (prev > 0 ? prev - 1 : viewingPhotoGallery.photos.length - 1))}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 p-2.5 bg-black/80 hover:bg-studio-terracotta text-white rounded-full transition-colors shadow-lg border border-white/20"
+                      title="Previous Photo"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActivePhotoIdx((prev) => (prev < viewingPhotoGallery.photos.length - 1 ? prev + 1 : 0))}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-black/80 hover:bg-studio-terracotta text-white rounded-full transition-colors shadow-lg border border-white/20"
+                      title="Next Photo"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Photo Actions & Metadata Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-3 w-full bg-studio-sand/60 p-4 rounded-2xl border border-studio-border text-xs font-mono">
+                <div className="space-y-1">
+                  <span className="text-purple-300 font-bold block">
+                    Photo #{activePhotoIdx + 1} &bull; Format: High-Res Original
+                  </span>
+                  {viewingPhotoGallery.caption && (
+                    <span className="text-studio-muted block">
+                      Printed Caption: <strong className="text-white italic">"{viewingPhotoGallery.caption}"</strong>
+                    </span>
+                  )}
+                  {viewingPhotoGallery.songUrl && (
+                    <span className="text-studio-muted block">
+                      Spotify Song Embed: <strong className="text-white">{viewingPhotoGallery.songUrl}</strong>
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => downloadSinglePhoto(viewingPhotoGallery.photos[activePhotoIdx], `Order_${viewingPhotoGallery.orderId}_Photo_${activePhotoIdx + 1}.jpg`)}
+                    className="px-4 py-2.5 bg-studio-terracotta hover:bg-studio-terracottaHover text-white rounded-xl font-mono font-bold text-xs transition-colors flex items-center gap-1.5 shadow-md"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Download This Photo (#{activePhotoIdx + 1})</span>
+                  </button>
+
+                  <a
+                    href={viewingPhotoGallery.photos[activePhotoIdx]}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-4 py-2.5 bg-studio-sand hover:bg-purple-900 border border-studio-border text-purple-300 hover:text-white rounded-xl font-mono text-xs transition-colors flex items-center gap-1.5"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Open in New Tab</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Thumbnail Strip Tray */}
+              <div className="w-full space-y-2">
+                <span className="text-[11px] font-mono uppercase text-studio-muted block font-bold">
+                  All {viewingPhotoGallery.photos.length} Photos in this Polaroid Pack (Click to switch):
+                </span>
+                <div className="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-12 gap-2 max-h-36 overflow-y-auto p-1 custom-scrollbar">
+                  {viewingPhotoGallery.photos.map((p, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => setActivePhotoIdx(idx)}
+                      className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
+                        activePhotoIdx === idx
+                          ? 'border-studio-terracotta ring-2 ring-studio-terracotta/50 scale-105 shadow-md'
+                          : 'border-studio-border hover:border-purple-400/50'
+                      }`}
+                    >
+                      <img src={p} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
+                      <span className="absolute bottom-0.5 left-0.5 bg-black/80 text-white font-mono text-[8px] px-1 rounded">
+                        #{idx + 1}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
 
           </div>

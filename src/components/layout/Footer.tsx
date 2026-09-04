@@ -61,37 +61,37 @@ export const Footer: React.FC = () => {
               <Palette className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-bold font-display text-white">300 GSM Archival Rag</h4>
+              <h4 className="text-sm font-bold font-display text-studio-charcoal">300 GSM Archival Rag</h4>
               <p className="text-xs text-studio-muted mt-0.5">Museum-grade heavy paper that won't curl or fade.</p>
             </div>
           </div>
 
           <div className="flex items-start gap-3 bg-studio-sand/40 p-4 rounded-2xl border border-studio-border">
-            <div className="p-2.5 bg-emerald-950/80 rounded-xl text-emerald-400 border border-emerald-500/30 flex-shrink-0">
+            <div className="p-2.5 bg-purple-950/80 rounded-xl text-purple-400 border border-purple-500/30 flex-shrink-0">
               <Leaf className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-bold font-display text-white">Plastic-Free Packaging</h4>
+              <h4 className="text-sm font-bold font-display text-studio-charcoal">Plastic-Free Packaging</h4>
               <p className="text-xs text-studio-muted mt-0.5">Heavy-duty rigid kraft tubes &amp; biodegradable tape.</p>
             </div>
           </div>
 
           <div className="flex items-start gap-3 bg-studio-sand/40 p-4 rounded-2xl border border-studio-border">
-            <div className="p-2.5 bg-amber-950/80 rounded-xl text-amber-400 border border-amber-500/30 flex-shrink-0">
+            <div className="p-2.5 bg-purple-950/80 rounded-xl text-purple-400 border border-purple-500/30 flex-shrink-0">
               <Package className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-bold font-display text-white">Free Hanging Accessories</h4>
+              <h4 className="text-sm font-bold font-display text-studio-charcoal">Free Hanging Accessories</h4>
               <p className="text-xs text-studio-muted mt-0.5">Every bundle includes wall-safe dots &amp; pegs.</p>
             </div>
           </div>
 
           <div className="flex items-start gap-3 bg-studio-sand/40 p-4 rounded-2xl border border-studio-border">
-            <div className="p-2.5 bg-sky-950/80 rounded-xl text-sky-400 border border-sky-500/30 flex-shrink-0">
+            <div className="p-2.5 bg-purple-950/80 rounded-xl text-purple-400 border border-purple-500/30 flex-shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-bold font-display text-white">Damage-Free Guarantee</h4>
+              <h4 className="text-sm font-bold font-display text-studio-charcoal">Damage-Free Guarantee</h4>
               <p className="text-xs text-studio-muted mt-0.5">Arrived bent? We reship instantly for free.</p>
             </div>
           </div>
@@ -104,16 +104,13 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-2 space-y-4">
             <div 
               onClick={() => navigate('home')}
-              className="cursor-pointer inline-flex items-center gap-3"
+              className="cursor-pointer inline-flex items-center group"
             >
               <img 
-                src="/logo.jpeg" 
+                src="/logo-transparent.png" 
                 alt="Stick Scape Studio" 
-                className="w-10 h-10 object-cover rounded-xl shadow-md border border-purple-500/40"
+                className="h-12 sm:h-14 w-auto max-w-[220px] object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_2px_12px_rgba(253,155,0,0.2)]"
               />
-              <span className="font-display font-black text-xl tracking-tight text-white uppercase">
-                STICK SCAPE STUDIO
-              </span>
             </div>
 
             <p className="text-sm text-studio-muted max-w-sm leading-relaxed">
@@ -125,7 +122,7 @@ export const Footer: React.FC = () => {
                 href="https://instagram.com/stickscape.studio" 
                 target="_blank" 
                 rel="noreferrer"
-                className="p-2.5 bg-studio-sand hover:bg-studio-terracotta hover:text-black rounded-full text-purple-200 border border-studio-border transition-colors"
+                className="p-2.5 bg-studio-sand hover:bg-studio-terracotta hover:text-white rounded-full text-studio-charcoal border border-studio-border transition-colors"
                 aria-label="Follow us on Instagram"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -136,12 +133,12 @@ export const Footer: React.FC = () => {
                 href="https://spotify.com" 
                 target="_blank" 
                 rel="noreferrer"
-                className="p-2.5 bg-studio-sand hover:bg-studio-terracotta hover:text-black rounded-full text-purple-200 border border-studio-border transition-colors"
+                className="p-2.5 bg-studio-sand hover:bg-studio-terracotta hover:text-white rounded-full text-studio-charcoal border border-studio-border transition-colors"
                 aria-label="Studio Lo-Fi Playlist on Spotify"
               >
                 <Disc className="w-4 h-4" />
               </a>
-              <div className="text-xs font-mono text-purple-300 ml-2 font-semibold">
+              <div className="text-xs font-mono text-purple-400 ml-2 font-semibold">
                 #stickscape.studio
               </div>
             </div>
@@ -149,32 +146,32 @@ export const Footer: React.FC = () => {
 
           {/* Nav Column 1: Shop */}
           <div>
-            <h5 className="font-mono text-xs uppercase tracking-widest text-purple-300 font-bold mb-4">
+            <h5 className="font-mono text-xs uppercase tracking-widest text-purple-400 font-bold mb-4">
               Explore Collections
             </h5>
-            <ul className="space-y-2.5 text-sm text-studio-muted">
+            <ul className="space-y-2.5 text-sm text-studio-charcoal/80">
               <li>
-                <button onClick={() => navigate('shop')} className="hover:text-purple-400 transition-colors">
+                <button onClick={() => navigate('shop')} className="hover:text-studio-terracotta transition-colors">
                   All Art &amp; Prints
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('posters')} className="hover:text-purple-400 transition-colors">
+                <button onClick={() => navigate('posters')} className="hover:text-studio-terracotta transition-colors">
                   Wall Posters (A4–A1)
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('polaroids')} className="hover:text-purple-400 transition-colors">
+                <button onClick={() => navigate('polaroids')} className="hover:text-studio-terracotta transition-colors">
                   Polaroid Photo Sets
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('shop', { category: 'bundles' })} className="hover:text-purple-400 transition-colors">
+                <button onClick={() => navigate('shop', { category: 'bundles' })} className="hover:text-studio-terracotta transition-colors">
                   Gallery Wall Bundles
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('shop', { theme: 'Cyberpunk & Neon' })} className="hover:text-purple-400 transition-colors">
+                <button onClick={() => navigate('shop', { theme: 'Cyberpunk & Neon' })} className="hover:text-studio-terracotta transition-colors">
                   Cyberpunk &amp; Lo-Fi Drops
                 </button>
               </li>
@@ -183,38 +180,39 @@ export const Footer: React.FC = () => {
 
           {/* Nav Column 2: Studio */}
           <div>
-            <h5 className="font-mono text-xs uppercase tracking-widest text-purple-300 font-bold mb-4">
+            <h5 className="font-mono text-xs uppercase tracking-widest text-purple-400 font-bold mb-4">
               About &amp; Care
             </h5>
-            <ul className="space-y-2.5 text-sm text-studio-muted">
+            <ul className="space-y-2.5 text-sm text-studio-charcoal/80">
               <li>
-                <button onClick={() => navigate('about')} className="hover:text-purple-400 transition-colors">
+                <button onClick={() => navigate('about')} className="hover:text-studio-terracotta transition-colors">
                   Our Story &amp; Studio
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('contact')} className="hover:text-purple-400 transition-colors">
+                <button onClick={() => navigate('contact')} className="hover:text-studio-terracotta transition-colors">
                   Contact &amp; Support
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('contact')} className="hover:text-purple-400 transition-colors">
+                <button onClick={() => navigate('contact')} className="hover:text-studio-terracotta transition-colors">
                   Frequently Asked Questions
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('posters')} className="hover:text-purple-400 transition-colors">
+                <button onClick={() => navigate('posters')} className="hover:text-studio-terracotta transition-colors">
                   Poster Size &amp; Frame Guide
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('about')} className="hover:text-purple-400 transition-colors">
+                <button onClick={() => navigate('about')} className="hover:text-studio-terracotta transition-colors">
                   Eco-Friendly Printing
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('admin')} className="text-purple-300 font-bold hover:text-white font-mono flex items-center gap-1.5 transition-colors pt-1">
-                  ⚡ Admin Orders Hub
+                <button onClick={() => navigate('admin')} className="text-purple-400 hover:text-white font-mono flex items-center gap-1 transition-colors mt-2 pt-2 border-t border-studio-border">
+                  <ShieldCheck className="w-3.5 h-3.5 text-studio-terracotta" />
+                  <span>Admin Portal</span>
                 </button>
               </li>
             </ul>
@@ -222,7 +220,7 @@ export const Footer: React.FC = () => {
 
           {/* Nav Column 3: Newsletter Form */}
           <div>
-            <h5 className="font-mono text-xs uppercase tracking-widest text-purple-300 font-bold mb-4">
+            <h5 className="font-mono text-xs uppercase tracking-widest text-purple-400 font-bold mb-4">
               Collector's Club
             </h5>
             <p className="text-xs text-studio-muted mb-3 leading-relaxed">
@@ -234,8 +232,8 @@ export const Footer: React.FC = () => {
                 <p className="text-xs font-semibold text-purple-300 flex items-center gap-1.5">
                   <Check className="w-4 h-4" /> You're on the VIP list!
                 </p>
-                <p className="text-[11px] text-purple-200 mt-1 font-mono">
-                  Code: <strong className="text-black bg-purple-400 px-1 py-0.5 rounded font-bold">STICK10</strong>
+                <p className="text-[11px] text-studio-charcoal mt-1 font-mono">
+                  Code: <strong className="text-white bg-studio-terracotta px-1.5 py-0.5 rounded font-bold">STICK10</strong>
                 </p>
               </div>
             ) : (
@@ -246,17 +244,17 @@ export const Footer: React.FC = () => {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-studio-sand border border-studio-border rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-studio-terracotta"
+                    className="w-full bg-studio-sand border border-studio-border rounded-xl px-3.5 py-2.5 text-xs text-studio-charcoal placeholder-studio-muted focus:outline-none focus:border-studio-terracotta"
                   />
                   <button
                     type="submit"
-                    className="absolute right-1.5 top-1.5 bg-studio-terracotta hover:bg-purple-400 text-black font-bold p-1.5 rounded-lg transition-colors shadow-sm"
+                    className="absolute right-1.5 top-1.5 bg-studio-terracotta hover:bg-studio-terracottaHover text-white p-1.5 rounded-lg transition-colors shadow-sm"
                     aria-label="Subscribe to newsletter"
                   >
-                    <ArrowRight className="w-3.5 h-3.5 text-black" />
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <p className="text-[10px] text-neutral-500 font-mono">
+                <p className="text-[10px] text-studio-muted font-mono">
                   Zero spam. Unsubscribe anytime.
                 </p>
               </form>
@@ -266,15 +264,22 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 font-mono gap-4">
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-studio-muted font-mono gap-4">
           <div>
             &copy; {new Date().getFullYear()} STICK SCAPE STUDIO. Hand-crafted wall art &amp; Polaroid prints.
           </div>
-          <div className="flex items-center gap-4 text-neutral-400">
+          <div className="flex items-center gap-4 text-studio-muted">
+            <button 
+              onClick={() => navigate('admin')}
+              className="hover:text-purple-300 transition-colors flex items-center gap-1"
+            >
+              <ShieldCheck className="w-3 h-3 text-studio-terracotta" /> Staff Portal
+            </button>
+            <span>&bull;</span>
             <span>Designed for Youth Living Spaces</span>
             <span>&bull;</span>
-            <span className="flex items-center gap-1 text-studio-terracotta">
-              <Heart className="w-3.5 h-3.5 fill-current" /> Made with passion
+            <span className="flex items-center gap-1 text-purple-400">
+              <Heart className="w-3.5 h-3.5 fill-current text-studio-terracotta" /> Made with passion
             </span>
           </div>
         </div>

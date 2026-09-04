@@ -53,9 +53,6 @@ export const ProductDetailsPage: React.FC = () => {
   const unitPrice = parseFloat(
     (product.price * selectedSize.priceMultiplier + (selectedFinish?.priceAdd || 0)).toFixed(2)
   );
-  const originalUnitPrice = product.originalPrice
-    ? parseFloat((product.originalPrice * selectedSize.priceMultiplier + (selectedFinish?.priceAdd || 0)).toFixed(2))
-    : null;
 
   const handleAddToCart = () => {
     addToCart(product, selectedSize, selectedFinish, quantity);
@@ -174,16 +171,6 @@ export const ProductDetailsPage: React.FC = () => {
               <span className="font-mono font-black text-2xl sm:text-3xl text-white">
                 ₹{Math.round(unitPrice)}
               </span>
-              {originalUnitPrice && (
-                <span className="font-mono text-lg text-studio-muted line-through">
-                  ₹{Math.round(originalUnitPrice)}
-                </span>
-              )}
-              {originalUnitPrice && (
-                <span className="bg-purple-950 text-purple-300 border border-purple-500/40 font-mono text-xs font-bold px-2.5 py-1 rounded-md">
-                  SAVE ₹{Math.round(originalUnitPrice - unitPrice)}
-                </span>
-              )}
             </div>
 
             <p className="text-sm text-studio-muted mt-3 leading-relaxed">
@@ -198,7 +185,9 @@ export const ProductDetailsPage: React.FC = () => {
             <div className="space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-mono uppercase font-bold text-purple-200">
-                  1. Choose Size / Pack Format:
+                  {product.category === 'polaroids' && product.finishes && product.finishes.length > 0
+                    ? '1. Choose Pack Format:'
+                    : 'Choose Size / Format:'}
                 </span>
                 <span className="font-mono text-studio-muted text-[11px]">
                   {selectedSize.dimensions}
@@ -225,12 +214,12 @@ export const ProductDetailsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* 2. Framing / Border Finish Selector (if applicable) */}
-            {product.finishes && product.finishes.length > 0 && (
+            {/* 2. Border Style Selector (Only for Polaroids if applicable) */}
+            {product.category === 'polaroids' && product.finishes && product.finishes.length > 0 && (
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-mono uppercase font-bold text-purple-200">
-                    2. Framing / Border Style:
+                    2. Border Style:
                   </span>
                   <span className="font-mono text-studio-muted text-[11px]">
                     {selectedFinish?.priceAdd === 0 ? 'Standard Included' : `+₹${selectedFinish?.priceAdd}`}

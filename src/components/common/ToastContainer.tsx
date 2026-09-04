@@ -1,6 +1,6 @@
 import React from 'react';
 import { useToast } from '../../context/ToastContext';
-import { CheckCircle2, Info, ShoppingBag, X } from 'lucide-react';
+import { CheckCircle2, Info, ShoppingBag, AlertCircle, X } from 'lucide-react';
 
 export const ToastContainer: React.FC = () => {
   const { toasts, removeToast } = useToast();
@@ -26,6 +26,8 @@ export const ToastContainer: React.FC = () => {
                 <ShoppingBag className="w-5 h-5 text-amber-400" />
               ) : toast.type === 'info' ? (
                 <Info className="w-5 h-5 text-sky-400" />
+              ) : toast.type === 'error' ? (
+                <AlertCircle className="w-5 h-5 text-rose-400" />
               ) : (
                 <CheckCircle2 className="w-5 h-5 text-emerald-400" />
               )}

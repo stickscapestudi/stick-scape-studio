@@ -5,10 +5,12 @@ import { requireAuth, requireRole } from '../middleware/auth.middleware.js';
 import { checkoutLimiter, trackingLimiter } from '../middleware/rate-limit.middleware.js';
 import { createOrderSchema, updateOrderStatusSchema } from '../validators/order.validator.js';
 
+import { optionalCustomerAuth } from '../middleware/customer-auth.middleware.js';
+
 const router = Router();
 
-// 1. PUBLIC Customer Endpoints (Rate Limited, No JWT Required)
-router.post('/', checkoutLimiter, validateBody(createOrderSchema), orderController.createOrder);
+// 1. PUBLIC Customer Endpoints (Rate Limited, Optional Customer Auth)
+router.post('/', checkoutLimiter, optionalCustomerAuth, validateBody(createOrderSchema), orderController.createOrder);
 
 // PUBLIC Customer Order Tracking (Rate Limited, Requires orderNumber param AND ?mobile=... query)
 router.get('/track/:orderNumber', trackingLimiter, orderController.trackOrder);

@@ -23,10 +23,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const isPolaroid = product.category === 'polaroids';
   const isBundle = product.category === 'bundles';
 
-  const discountPercent = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
-
   const currentPrice = (product.price * selectedSize.priceMultiplier).toFixed(2);
 
   const handleQuickAdd = (e: React.MouseEvent) => {
@@ -46,8 +42,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       onClick={() => navigate('product', { id: product.id })}
       className={`group cursor-pointer flex flex-col justify-between transition-all duration-300 ${
         isPolaroid
-          ? 'polaroid-card rounded-md bg-studio-card border border-studio-border/80 hover:shadow-polaroid-hover hover:border-purple-500/80'
-          : 'bg-studio-card rounded-2xl p-3 sm:p-4 border border-studio-border/80 shadow-sm hover:shadow-art-hover hover:-translate-y-1 hover:border-purple-500/80'
+          ? 'polaroid-card rounded-md bg-studio-card border border-studio-border/80 hover:shadow-polaroid-hover hover:border-studio-terracotta'
+          : 'bg-studio-card rounded-2xl p-3 sm:p-4 border border-studio-border/80 shadow-sm hover:shadow-art-hover hover:-translate-y-1 hover:border-studio-terracotta'
       }`}
     >
       {/* Top Image Container */}
@@ -67,17 +63,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Badges Overlay */}
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10">
           {product.isBestSeller && (
-            <span className="bg-purple-950/90 text-purple-200 border border-purple-500/40 font-mono text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md backdrop-blur-sm shadow-sm flex items-center gap-1">
-              <Sparkles className="w-2.5 h-2.5 text-amber-400" /> Bestseller
-            </span>
-          )}
-          {discountPercent > 0 && (
-            <span className="bg-studio-terracotta text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm">
-              Save {discountPercent}%
+            <span className="bg-purple-950/90 text-purple-200 border border-purple-400/40 font-mono text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md backdrop-blur-sm shadow-sm flex items-center gap-1">
+              <Sparkles className="w-2.5 h-2.5 text-amber-300" /> Bestseller
             </span>
           )}
           {isBundle && (
-            <span className="bg-studio-sage/20 text-purple-200 border border-purple-400/30 font-mono text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm">
+            <span className="bg-purple-950/80 text-purple-200 border border-purple-400/40 font-mono text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm">
               {product.bundleItemsCount} Art Pieces
             </span>
           )}
@@ -91,8 +82,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           }}
           className={`absolute top-2.5 right-2.5 p-2 rounded-full backdrop-blur-md transition-all duration-200 z-10 ${
             isFavorite
-              ? 'bg-purple-600 text-white shadow-md scale-110'
-              : 'bg-studio-card/80 text-white hover:bg-purple-600 hover:text-white border border-white/10 opacity-90 sm:opacity-0 group-hover:opacity-100'
+              ? 'bg-studio-terracotta text-white shadow-md scale-110'
+              : 'bg-studio-card/80 text-studio-charcoal hover:bg-studio-terracotta hover:text-white border border-white/10 opacity-90 sm:opacity-0 group-hover:opacity-100'
           }`}
           aria-label="Save to wishlist"
         >
@@ -104,9 +95,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {showSizePicker ? (
             <div 
               onClick={(e) => e.stopPropagation()} 
-              className="bg-studio-dark/95 backdrop-blur-md text-white p-2 rounded-xl shadow-xl space-y-1.5 border border-white/20 animate-fadeIn"
+              className="bg-studio-dark/95 backdrop-blur-md text-white p-2 rounded-xl shadow-xl space-y-1.5 border border-purple-500/30 animate-fadeIn"
             >
-              <div className="text-[10px] font-mono text-neutral-300 px-1 uppercase tracking-wider">Select Size/Pack:</div>
+              <div className="text-[10px] font-mono text-purple-300 px-1 uppercase tracking-wider">Select Size/Pack:</div>
               <div className="grid grid-cols-2 gap-1">
                 {product.sizes.map((sz) => (
                   <button
@@ -115,7 +106,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                       setSelectedSize(sz);
                     }}
                     className={`text-[11px] py-1 px-2 rounded-md font-mono text-left truncate transition-colors ${
-                      selectedSize.id === sz.id ? 'bg-studio-terracotta text-black font-bold' : 'bg-studio-sand hover:bg-white/10 text-purple-200'
+                      selectedSize.id === sz.id ? 'bg-studio-terracotta text-white font-bold' : 'bg-studio-sand hover:bg-white/10 text-studio-charcoal'
                     }`}
                   >
                     {sz.name.split(' ')[0]} - ₹{(product.price * sz.priceMultiplier).toFixed(0)}
@@ -124,7 +115,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </div>
               <button
                 onClick={handleQuickAdd}
-                className="w-full bg-studio-terracotta text-black hover:bg-purple-400 font-display font-bold py-1.5 rounded-lg text-xs tracking-wider uppercase transition-colors"
+                className="w-full bg-studio-terracotta hover:bg-studio-terracottaHover text-white font-display font-bold py-1.5 rounded-lg text-xs tracking-wider uppercase transition-colors"
               >
                 Confirm &amp; Add
               </button>
@@ -136,17 +127,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   e.stopPropagation();
                   setShowSizePicker(true);
                 }}
-                className="flex-1 bg-studio-terracotta hover:bg-purple-400 text-black backdrop-blur-md py-2.5 px-3 rounded-xl font-display font-bold text-xs uppercase tracking-wider transition-colors shadow-lg flex items-center justify-center gap-1.5 border border-purple-400/30"
+                className="flex-1 bg-studio-terracotta hover:bg-studio-terracottaHover text-white backdrop-blur-md py-2.5 px-3 rounded-xl font-display font-bold text-xs uppercase tracking-wider transition-colors shadow-lg flex items-center justify-center gap-1.5 border border-purple-400/30"
               >
                 {isAddedRecently ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-black stroke-[3]" />
-                    <span className="text-black font-bold">Added!</span>
+                    <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
+                    <span className="text-white font-bold">Added!</span>
                   </>
                 ) : (
                   <>
-                    <ShoppingBag className="w-3.5 h-3.5 text-black stroke-[2.5]" />
-                    <span className="text-black font-bold">Quick Add</span>
+                    <ShoppingBag className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                    <span className="text-white font-bold">Quick Add</span>
                   </>
                 )}
               </button>
@@ -172,7 +163,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
 
           {/* Title */}
-          <h3 className="font-display font-bold text-sm text-white group-hover:text-purple-400 transition-colors line-clamp-1">
+          <h3 className="font-display font-bold text-sm text-studio-charcoal group-hover:text-studio-terracotta transition-colors line-clamp-1">
             {product.name}
           </h3>
 
@@ -185,16 +176,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="mt-3 pt-2.5 border-t border-studio-border/60 flex items-center justify-between">
           <div>
             <div className="flex items-baseline gap-1.5">
-              <span className="font-mono font-bold text-base text-white">
+              <span className="font-mono font-bold text-base text-studio-charcoal">
                 ₹{Math.round(Number(currentPrice))}
               </span>
-              {product.originalPrice && (
-                <span className="font-mono text-xs text-studio-muted line-through">
-                  ₹{Math.round(product.originalPrice * selectedSize.priceMultiplier)}
-                </span>
-              )}
             </div>
-            <span className="text-[10px] text-purple-300/70 font-mono block -mt-0.5">
+            <span className="text-[10px] text-purple-400/80 font-mono block -mt-0.5">
               {selectedSize.name.split(' ')[0]} format
             </span>
           </div>
@@ -202,10 +188,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {/* Mobile Quick Add Button */}
           <button
             onClick={handleQuickAdd}
-            className="sm:hidden p-2 bg-studio-terracotta text-black rounded-lg hover:bg-purple-400 transition-colors shadow-sm font-bold"
+            className="sm:hidden p-2 bg-studio-terracotta text-white rounded-lg hover:bg-studio-terracottaHover transition-colors shadow-sm font-bold"
             aria-label="Add to bag"
           >
-            <ShoppingBag className="w-4 h-4 text-black" />
+            <ShoppingBag className="w-4 h-4 text-white" />
           </button>
         </div>
 
