@@ -9,7 +9,9 @@ export const orderItemInputSchema = z.object({
   images: z.array(z.string()).optional(),
   uploadedPhotos: z.array(z.string()).optional(),
   customCaption: z.string().optional(),
+  customCaptions: z.array(z.string()).optional(),
   songUrl: z.string().optional(),
+  songUrls: z.array(z.string()).optional(),
   description: z.string().optional(),
   customDescription: z.string().optional(),
 });

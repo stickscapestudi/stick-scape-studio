@@ -273,7 +273,9 @@ export const orderService = {
           descriptionPayload = JSON.stringify({
             customType: isPoster ? 'wall-poster' : 'polaroid',
             caption: item.customCaption,
+            captions: item.customCaptions,
             songUrl: item.songUrl,
+            songUrls: item.songUrls,
             photos: photosList,
             photoCount: photosList.length,
           });

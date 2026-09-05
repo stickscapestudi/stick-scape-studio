@@ -33,6 +33,8 @@ import {
   Eye,
   Music,
   Type,
+  Copy,
+  Sparkles,
 } from 'lucide-react';
 
 export const AdminPage: React.FC = () => {
@@ -77,6 +79,24 @@ export const AdminPage: React.FC = () => {
     songUrls?: string[];
   } | null>(null);
   const [activePhotoIdx, setActivePhotoIdx] = useState<number>(0);
+
+  const copyToClipboard = (text: string | undefined | null, label: string) => {
+    if (!text) return;
+    try {
+      navigator.clipboard.writeText(text);
+      addToast({
+        title: 'Copied to Clipboard! 📋',
+        message: `${label} copied.`,
+        type: 'success',
+      });
+    } catch {
+      addToast({
+        title: 'Copy Failed',
+        message: text,
+        type: 'info',
+      });
+    }
+  };
 
   const downloadSinglePhoto = (imgUrl: string, filename: string) => {
     try {
@@ -650,6 +670,87 @@ export const AdminPage: React.FC = () => {
                                   </div>
                                 </div>
 
+                                {/* Custom Captions in Table Cell */}
+                                {item.customCaptions && item.customCaptions.length > 0 ? (
+                                  <div className="bg-purple-950/40 p-2 rounded-xl border border-purple-500/30 text-[11px] font-mono space-y-1">
+                                    <div className="flex items-center justify-between gap-1">
+                                      <span className="text-purple-300 font-bold flex items-center gap-1">
+                                        <Type className="w-3 h-3 text-purple-400" />
+                                        <span>{item.customCaptions.length} Captions:</span>
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => copyToClipboard(item.customCaptions!.join('\n'), `${item.customCaptions!.length} Captions`)}
+                                        className="text-[9px] text-purple-300 hover:text-white bg-purple-900/60 px-1.5 py-0.5 rounded flex items-center gap-0.5"
+                                        title="Copy all captions"
+                                      >
+                                        <Copy className="w-2.5 h-2.5" />
+                                        <span>Copy All</span>
+                                      </button>
+                                    </div>
+                                    <p className="text-white italic truncate max-w-xs" title={item.customCaptions.join(' | ')}>
+                                      #1: "{item.customCaptions[0]}" {item.customCaptions.length > 1 ? `(+${item.customCaptions.length - 1} more)` : ''}
+                                    </p>
+                                  </div>
+                                ) : item.customCaption ? (
+                                  <div className="bg-purple-950/40 p-2 rounded-xl border border-purple-500/30 text-[11px] font-mono flex items-center justify-between gap-1">
+                                    <div className="flex items-center gap-1.5 truncate max-w-[200px]">
+                                      <Type className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                                      <span className="text-purple-300 font-bold">Caption:</span>
+                                      <span className="text-white italic truncate">"{item.customCaption}"</span>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => copyToClipboard(item.customCaption, 'Caption')}
+                                      className="text-[9px] text-purple-300 hover:text-white p-1 rounded"
+                                      title="Copy caption"
+                                    >
+                                      <Copy className="w-2.5 h-2.5" />
+                                    </button>
+                                  </div>
+                                ) : null}
+
+                                {/* Custom Song URLs in Table Cell */}
+                                {item.songUrls && item.songUrls.length > 0 ? (
+                                  <div className="bg-purple-950/40 p-2 rounded-xl border border-purple-500/30 text-[11px] font-mono space-y-1">
+                                    <div className="flex items-center justify-between gap-1">
+                                      <span className="text-purple-300 font-bold flex items-center gap-1">
+                                        <Music className="w-3 h-3 text-purple-400" />
+                                        <span>{item.songUrls.length} Song Links:</span>
+                                      </span>
+                                      <a
+                                        href={item.songUrls[0]}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-[9px] text-studio-terracotta hover:underline font-bold flex items-center gap-0.5"
+                                      >
+                                        <span>Open #1</span>
+                                        <ExternalLink className="w-2.5 h-2.5" />
+                                      </a>
+                                    </div>
+                                    <p className="text-white truncate max-w-xs text-[10px]" title={item.songUrls.join(' | ')}>
+                                      #1: {item.songUrls[0]}
+                                    </p>
+                                  </div>
+                                ) : item.songUrl ? (
+                                  <div className="bg-purple-950/40 p-2 rounded-xl border border-purple-500/30 text-[11px] font-mono flex items-center justify-between gap-1">
+                                    <div className="flex items-center gap-1.5 truncate max-w-[180px]">
+                                      <Music className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                                      <span className="text-purple-300 font-bold">Song:</span>
+                                      <span className="text-white truncate text-[10px]">{item.songUrl}</span>
+                                    </div>
+                                    <a
+                                      href={item.songUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-[9px] text-studio-terracotta hover:underline font-bold flex items-center gap-0.5 flex-shrink-0"
+                                    >
+                                      <span>Open</span>
+                                      <ExternalLink className="w-2.5 h-2.5" />
+                                    </a>
+                                  </div>
+                                ) : null}
+
                                 {/* Customer Uploaded Photos / Artwork Preview Tray */}
                                 {isCustomPrint && photos.length > 0 && (
                                   <div className="bg-purple-950/40 p-2.5 rounded-2xl border border-purple-500/30 space-y-2">
@@ -911,33 +1012,139 @@ export const AdminPage: React.FC = () => {
                               </button>
                             </div>
 
-                            {/* Caption or Song URL Info */}
-                            {item.customCaption && (
-                              <div className="flex items-center gap-2 text-xs font-mono bg-studio-sand/60 px-3 py-2 rounded-xl border border-studio-border">
-                                <Type className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
-                                <span className="text-purple-300">Printed Handwritten Caption:</span>
-                                <strong className="text-white italic">"{item.customCaption}"</strong>
+                            {/* Captions Section (Multi or Single) */}
+                            {item.customCaptions && item.customCaptions.length > 0 ? (
+                              <div className="bg-studio-sand/70 p-3.5 rounded-2xl border border-studio-border space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-mono font-bold text-purple-200 flex items-center gap-1.5">
+                                    <Type className="w-3.5 h-3.5 text-purple-400" />
+                                    <span>Printed Handwritten Captions ({item.customCaptions.length} Total):</span>
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => copyToClipboard(item.customCaptions!.map((c: string, idx: number) => `#${idx + 1}: ${c}`).join('\n'), 'All Captions')}
+                                    className="text-[10px] font-mono font-bold text-purple-300 hover:text-white bg-purple-900/60 hover:bg-purple-800 px-2.5 py-1 rounded-lg transition-colors border border-purple-500/30 flex items-center gap-1"
+                                  >
+                                    <Copy className="w-3 h-3" />
+                                    <span>Copy All Captions</span>
+                                  </button>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                                  {item.customCaptions.map((cap: string, cIdx: number) => (
+                                    <div key={cIdx} className="bg-black/40 p-2 rounded-xl border border-purple-500/20 text-xs font-mono flex items-center justify-between gap-2">
+                                      <div className="flex items-center gap-1.5 min-w-0">
+                                        <span className="bg-purple-900/80 text-purple-200 font-bold px-1.5 py-0.5 rounded text-[10px] flex-shrink-0">
+                                          #{cIdx + 1}
+                                        </span>
+                                        <span className="text-white italic truncate" title={cap}>"{cap}"</span>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => copyToClipboard(cap, `Caption #${cIdx + 1}`)}
+                                        className="text-studio-muted hover:text-white p-1 rounded transition-colors"
+                                        title="Copy this caption"
+                                      >
+                                        <Copy className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
-                            )}
+                            ) : item.customCaption ? (
+                              <div className="flex items-center justify-between gap-2 text-xs font-mono bg-studio-sand/70 px-3 py-2.5 rounded-xl border border-studio-border">
+                                <div className="flex items-center gap-2 truncate">
+                                  <Type className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
+                                  <span className="text-purple-300">Printed Caption:</span>
+                                  <strong className="text-white italic truncate">"{item.customCaption}"</strong>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => copyToClipboard(item.customCaption, 'Caption')}
+                                  className="text-[10px] font-mono text-purple-300 hover:text-white bg-purple-900/50 hover:bg-purple-800 px-2 py-1 rounded-lg transition-colors border border-purple-500/30 flex items-center gap-1 flex-shrink-0"
+                                >
+                                  <Copy className="w-3 h-3" />
+                                  <span>Copy</span>
+                                </button>
+                              </div>
+                            ) : null}
 
-                            {item.songUrl && (
-                              <div className="flex items-center justify-between gap-2 text-xs font-mono bg-studio-sand/60 px-3 py-2 rounded-xl border border-studio-border">
+                            {/* Song URLs Section (Multi or Single) */}
+                            {item.songUrls && item.songUrls.length > 0 ? (
+                              <div className="bg-studio-sand/70 p-3.5 rounded-2xl border border-studio-border space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-mono font-bold text-purple-200 flex items-center gap-1.5">
+                                    <Music className="w-3.5 h-3.5 text-purple-400" />
+                                    <span>Scannable Spotify Soundwave Track Links ({item.songUrls.length} Total):</span>
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => copyToClipboard(item.songUrls!.map((s: string, idx: number) => `#${idx + 1}: ${s}`).join('\n'), 'All Song Links')}
+                                    className="text-[10px] font-mono font-bold text-purple-300 hover:text-white bg-purple-900/60 hover:bg-purple-800 px-2.5 py-1 rounded-lg transition-colors border border-purple-500/30 flex items-center gap-1"
+                                  >
+                                    <Copy className="w-3 h-3" />
+                                    <span>Copy All Links</span>
+                                  </button>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                                  {item.songUrls.map((sUrl: string, sIdx: number) => (
+                                    <div key={sIdx} className="bg-black/40 p-2 rounded-xl border border-purple-500/20 text-xs font-mono flex items-center justify-between gap-2">
+                                      <div className="flex items-center gap-1.5 min-w-0">
+                                        <span className="bg-purple-900/80 text-purple-200 font-bold px-1.5 py-0.5 rounded text-[10px] flex-shrink-0">
+                                          #{sIdx + 1}
+                                        </span>
+                                        <span className="text-white truncate text-[11px]" title={sUrl}>{sUrl}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1 flex-shrink-0">
+                                        <button
+                                          type="button"
+                                          onClick={() => copyToClipboard(sUrl, `Song URL #${sIdx + 1}`)}
+                                          className="text-studio-muted hover:text-white p-1 rounded transition-colors"
+                                          title="Copy link"
+                                        >
+                                          <Copy className="w-3 h-3" />
+                                        </button>
+                                        <a
+                                          href={sUrl}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="text-[10px] text-studio-terracotta hover:underline font-bold flex items-center gap-0.5"
+                                        >
+                                          <span>Open</span>
+                                          <ExternalLink className="w-2.5 h-2.5" />
+                                        </a>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : item.songUrl ? (
+                              <div className="flex items-center justify-between gap-2 text-xs font-mono bg-studio-sand/70 px-3 py-2.5 rounded-xl border border-studio-border">
                                 <div className="flex items-center gap-2 truncate">
                                   <Music className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
                                   <span className="text-purple-300">Scannable Spotify / Song Bar:</span>
                                   <span className="text-white truncate max-w-xs">{item.songUrl}</span>
                                 </div>
-                                <a
-                                  href={item.songUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-[11px] text-studio-terracotta hover:underline font-bold flex items-center gap-1 flex-shrink-0"
-                                >
-                                  <span>Open Link</span>
-                                  <ExternalLink className="w-3 h-3" />
-                                </a>
+                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => copyToClipboard(item.songUrl, 'Song Link')}
+                                    className="text-[10px] font-mono text-purple-300 hover:text-white bg-purple-900/50 hover:bg-purple-800 px-2 py-1 rounded-lg transition-colors border border-purple-500/30 flex items-center gap-1"
+                                  >
+                                    <Copy className="w-3 h-3" />
+                                    <span>Copy</span>
+                                  </button>
+                                  <a
+                                    href={item.songUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-[11px] text-studio-terracotta hover:underline font-bold flex items-center gap-1"
+                                  >
+                                    <span>Open Link</span>
+                                    <ExternalLink className="w-3 h-3" />
+                                  </a>
+                                </div>
                               </div>
-                            )}
+                            ) : null}
 
                             {/* Photos Grid */}
                             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5 pt-1">
@@ -1098,24 +1305,53 @@ export const AdminPage: React.FC = () => {
 
               {/* Photo Actions & Metadata Bar */}
               <div className="flex flex-wrap items-center justify-between gap-3 w-full bg-studio-sand/60 p-4 rounded-2xl border border-studio-border text-xs font-mono">
-                <div className="space-y-1">
+                <div className="space-y-1.5 min-w-0">
                   <span className="text-purple-300 font-bold block">
-                    Photo #{activePhotoIdx + 1} &bull; Format: High-Res Original
+                    Photo #{activePhotoIdx + 1} of {viewingPhotoGallery.photos.length} &bull; High-Res Original
                   </span>
                   {(() => {
                     const specificCaption = viewingPhotoGallery.captions?.[activePhotoIdx] || viewingPhotoGallery.caption;
                     return specificCaption ? (
-                      <span className="text-studio-muted block">
-                        Printed Caption {viewingPhotoGallery.captions && viewingPhotoGallery.captions.length > 1 ? `(#${activePhotoIdx + 1})` : ''}: <strong className="text-white italic">"{specificCaption}"</strong>
-                      </span>
+                      <div className="flex items-center gap-2 flex-wrap text-studio-muted">
+                        <Type className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                        <span>Printed Caption:</span>
+                        <strong className="text-white italic">"{specificCaption}"</strong>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(specificCaption, `Caption for Photo #${activePhotoIdx + 1}`)}
+                          className="text-[9px] font-mono text-purple-300 hover:text-white bg-purple-900/60 px-1.5 py-0.5 rounded flex items-center gap-0.5 ml-1"
+                        >
+                          <Copy className="w-2.5 h-2.5" />
+                          <span>Copy Caption</span>
+                        </button>
+                      </div>
                     ) : null;
                   })()}
                   {(() => {
                     const specificSong = viewingPhotoGallery.songUrls?.[activePhotoIdx] || viewingPhotoGallery.songUrl;
                     return specificSong ? (
-                      <span className="text-studio-muted block">
-                        Spotify Song Embed {viewingPhotoGallery.songUrls && viewingPhotoGallery.songUrls.length > 1 ? `(#${activePhotoIdx + 1})` : ''}: <strong className="text-white">{specificSong}</strong>
-                      </span>
+                      <div className="flex items-center gap-2 flex-wrap text-studio-muted">
+                        <Music className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                        <span>Spotify Embed:</span>
+                        <strong className="text-white truncate max-w-xs">{specificSong}</strong>
+                        <a
+                          href={specificSong}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[10px] text-studio-terracotta hover:underline font-bold flex items-center gap-0.5 ml-1"
+                        >
+                          <span>Open Spotify</span>
+                          <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(specificSong, `Song Link for Photo #${activePhotoIdx + 1}`)}
+                          className="text-[9px] font-mono text-purple-300 hover:text-white bg-purple-900/60 px-1.5 py-0.5 rounded flex items-center gap-0.5"
+                        >
+                          <Copy className="w-2.5 h-2.5" />
+                          <span>Copy Link</span>
+                        </button>
+                      </div>
                     ) : null;
                   })()}
                 </div>
@@ -1166,6 +1402,99 @@ export const AdminPage: React.FC = () => {
                   ))}
                 </div>
               </div>
+
+              {/* All Captions & Songs Cheat Sheet */}
+              {((viewingPhotoGallery.captions && viewingPhotoGallery.captions.length > 0) || (viewingPhotoGallery.songUrls && viewingPhotoGallery.songUrls.length > 0)) && (
+                <div className="w-full bg-studio-sand/70 p-4 rounded-2xl border border-studio-border space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono font-bold text-purple-200 uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                      <span>All Print Captions &amp; Spotify Soundwave Links ({viewingPhotoGallery.photos.length} Total):</span>
+                    </span>
+                    <div className="flex items-center gap-2">
+                      {viewingPhotoGallery.captions && viewingPhotoGallery.captions.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(viewingPhotoGallery.captions!.map((c, i) => `Photo #${i + 1}: ${c}`).join('\n'), 'All Captions')}
+                          className="text-[10px] font-mono font-bold text-purple-300 hover:text-white bg-purple-900/60 hover:bg-purple-800 px-2.5 py-1 rounded-lg transition-colors border border-purple-500/30 flex items-center gap-1"
+                        >
+                          <Copy className="w-3 h-3" />
+                          <span>Copy All Captions</span>
+                        </button>
+                      )}
+                      {viewingPhotoGallery.songUrls && viewingPhotoGallery.songUrls.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(viewingPhotoGallery.songUrls!.map((s, i) => `Photo #${i + 1}: ${s}`).join('\n'), 'All Song Links')}
+                          className="text-[10px] font-mono font-bold text-purple-300 hover:text-white bg-purple-900/60 hover:bg-purple-800 px-2.5 py-1 rounded-lg transition-colors border border-purple-500/30 flex items-center gap-1"
+                        >
+                          <Copy className="w-3 h-3" />
+                          <span>Copy All Songs</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                    {viewingPhotoGallery.photos.map((_, pIdx) => {
+                      const cap = viewingPhotoGallery.captions?.[pIdx] || viewingPhotoGallery.caption;
+                      const song = viewingPhotoGallery.songUrls?.[pIdx] || viewingPhotoGallery.songUrl;
+
+                      return (
+                        <div
+                          key={pIdx}
+                          onClick={() => setActivePhotoIdx(pIdx)}
+                          className={`p-2 rounded-xl border text-xs font-mono cursor-pointer transition-colors ${
+                            activePhotoIdx === pIdx
+                              ? 'bg-purple-950/80 border-purple-500 ring-1 ring-purple-500/50'
+                              : 'bg-black/30 border-purple-500/20 hover:border-purple-400/50'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-1 mb-1">
+                            <span className="bg-purple-900/80 text-purple-200 font-bold px-1.5 py-0.2 rounded text-[10px]">
+                              Photo #{pIdx + 1}
+                            </span>
+                            {cap && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  copyToClipboard(cap, `Caption #${pIdx + 1}`);
+                                }}
+                                className="text-[9px] text-studio-muted hover:text-white p-0.5"
+                                title="Copy caption"
+                              >
+                                <Copy className="w-2.5 h-2.5" />
+                              </button>
+                            )}
+                          </div>
+                          {cap && (
+                            <p className="text-white italic truncate text-[11px]" title={cap}>
+                              ✍️ "{cap}"
+                            </p>
+                          )}
+                          {song && (
+                            <div className="flex items-center justify-between gap-1 mt-1">
+                              <span className="text-purple-300 truncate text-[10px]" title={song}>
+                                🎵 {song}
+                              </span>
+                              <a
+                                href={song}
+                                target="_blank"
+                                rel="noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-studio-terracotta hover:underline text-[9px] font-bold flex-shrink-0"
+                              >
+                                Open
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
             </div>
 
