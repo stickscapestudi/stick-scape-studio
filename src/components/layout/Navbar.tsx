@@ -29,16 +29,16 @@ export const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
-  const navLinks: { label: string; page: PageRoute; params?: Record<string, string> }[] = [
+  const navLinks: { label: string; shortLabel?: string; page: PageRoute; params?: Record<string, string> }[] = [
     { label: 'Home', page: 'home' },
     { label: 'All Art', page: 'shop' },
-    { label: 'Wall Posters', page: 'posters' },
-    { label: 'Polaroid Prints', page: 'polaroids' },
+    { label: 'Wall Posters', shortLabel: 'Posters', page: 'posters' },
+    { label: 'Polaroid Prints', shortLabel: 'Polaroids', page: 'polaroids' },
     { label: 'Bouquet', page: 'bouquets' },
-    { label: 'Room Bundles', page: 'shop', params: { category: 'bundles' } },
-    { label: 'Feedback & Reviews', page: 'reviews' },
+    { label: 'Room Bundles', shortLabel: 'Bundles', page: 'shop', params: { category: 'bundles' } },
+    { label: 'Feedback & Reviews', shortLabel: 'Reviews', page: 'reviews' },
     { label: 'Track Order', page: 'track-order' },
-    { label: 'About Studio', page: 'about' },
+    { label: 'About Studio', shortLabel: 'About', page: 'about' },
     { label: 'Contact', page: 'contact' },
   ];
 
@@ -63,8 +63,8 @@ export const Navbar: React.FC = () => {
   return (
     <>
       {/* Main Navigation */}
-      <header className="sticky top-0 z-40 bg-studio-bg/90 backdrop-blur-md border-b border-studio-border transition-all duration-300">
-        <div className="w-full px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 bg-studio-bg/95 backdrop-blur-md border-b border-studio-border transition-all duration-300">
+        <div className="w-full max-w-[1700px] mx-auto px-2 sm:px-4 lg:px-5 xl:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 xl:gap-4">
           
           {/* Brand Logo (Far Left) */}
           <div 
@@ -74,12 +74,12 @@ export const Navbar: React.FC = () => {
             <img 
               src="/logo-transparent.png" 
               alt="Stick Scape Studio" 
-              className="h-11 sm:h-12 w-auto max-w-[190px] sm:max-w-[220px] object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_2px_12px_rgba(253,155,0,0.2)]"
+              className="h-8 sm:h-10 xl:h-12 w-auto max-w-[130px] sm:max-w-[160px] xl:max-w-[200px] object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_2px_12px_rgba(253,155,0,0.2)]"
             />
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-3.5 xl:gap-6 2xl:gap-8 flex-shrink-0">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2.5 2xl:gap-4.5 flex-1 justify-center max-w-fit mx-auto px-1">
             {navLinks.map((link) => {
               const isActive = 
                 currentPage === link.page && 
@@ -88,15 +88,22 @@ export const Navbar: React.FC = () => {
                 <button
                   key={link.label}
                   onClick={() => navigate(link.page, link.params)}
-                  className={`text-xs xl:text-sm font-medium tracking-wide transition-colors duration-200 py-1 relative whitespace-nowrap flex-shrink-0 ${
+                  className={`text-[11px] xl:text-xs 2xl:text-[13px] font-medium tracking-tight xl:tracking-normal transition-colors duration-200 py-1 px-1 xl:px-1.5 relative whitespace-nowrap flex-shrink-0 ${
                     isActive
-                      ? 'text-studio-terracotta font-semibold'
+                      ? 'text-studio-terracotta font-bold'
                       : 'text-studio-charcoal hover:text-studio-terracotta'
                   }`}
                 >
-                  {link.label}
+                  {link.shortLabel ? (
+                    <>
+                      <span className="hidden xl:inline">{link.label}</span>
+                      <span className="inline xl:hidden">{link.shortLabel}</span>
+                    </>
+                  ) : (
+                    link.label
+                  )}
                   {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-studio-terracotta rounded-full" />
+                    <span className="absolute bottom-0 left-0.5 right-0.5 h-0.5 bg-studio-terracotta rounded-full shadow-[0_0_8px_rgba(147,51,234,0.8)]" />
                   )}
                 </button>
               );
@@ -104,26 +111,26 @@ export const Navbar: React.FC = () => {
           </nav>
 
           {/* Actions: Search, Wishlist, Bag, Mobile Menu */}
-          <div className="flex items-center gap-2 sm:gap-3 xl:gap-4 flex-shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 xl:gap-3 flex-shrink-0">
             
             {/* Search Trigger */}
             <button
               onClick={() => setSearchOpen(true)}
-              className="p-2 text-studio-charcoal hover:text-studio-terracotta hover:bg-studio-sand/50 rounded-full transition-colors flex-shrink-0"
+              className="p-1.5 sm:p-2 text-studio-charcoal hover:text-studio-terracotta hover:bg-studio-sand/50 rounded-full transition-colors flex-shrink-0"
               aria-label="Search art and polaroids"
               title="Search art"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
 
             {/* Wishlist Button */}
             <button
               onClick={() => navigate('shop', { wishlist: 'true' })}
-              className="p-2 text-studio-charcoal hover:text-studio-terracotta hover:bg-studio-sand/50 rounded-full transition-colors relative flex-shrink-0"
+              className="p-1.5 sm:p-2 text-studio-charcoal hover:text-studio-terracotta hover:bg-studio-sand/50 rounded-full transition-colors relative flex-shrink-0"
               aria-label={`Wishlist with ${wishlistCount} items`}
               title="Saved Favorites"
             >
-              <Heart className="w-5 h-5" />
+              <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
               {wishlistCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-studio-terracotta text-white font-mono text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
                   {wishlistCount}
@@ -136,10 +143,10 @@ export const Navbar: React.FC = () => {
               {isLoggedIn && customer ? (
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 p-1.5 rounded-full hover:bg-studio-sand/80 border border-transparent hover:border-studio-terracotta/40 transition-all flex-shrink-0"
+                  className="flex items-center gap-2 p-1 rounded-full hover:bg-studio-sand/80 border border-transparent hover:border-studio-terracotta/40 transition-all flex-shrink-0"
                   title="My Account"
                 >
-                  <div className="w-8 h-8 rounded-full bg-studio-terracotta flex items-center justify-center text-white text-xs font-display font-black shadow-sm">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-studio-terracotta flex items-center justify-center text-white text-xs font-display font-black shadow-sm">
                     {customer.avatarUrl ? (
                       <img
                         src={customer.avatarUrl}
@@ -154,7 +161,7 @@ export const Navbar: React.FC = () => {
               ) : (
                 <button
                   onClick={() => navigate('login')}
-                  className="hidden sm:flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider py-1.5 px-3.5 rounded-full bg-studio-sand hover:bg-studio-terracotta hover:text-white text-studio-charcoal border border-studio-border hover:border-studio-terracotta transition-all whitespace-nowrap flex-shrink-0"
+                  className="hidden sm:flex items-center gap-1 text-[11px] xl:text-xs font-mono font-bold uppercase tracking-wider py-1.5 px-2.5 xl:px-3.5 rounded-full bg-studio-sand hover:bg-studio-terracotta hover:text-white text-studio-charcoal border border-studio-border hover:border-studio-terracotta transition-all whitespace-nowrap flex-shrink-0"
                   title="Sign In"
                 >
                   <User className="w-3.5 h-3.5 text-studio-terracotta" />
@@ -218,12 +225,12 @@ export const Navbar: React.FC = () => {
             {/* Cart Bag Trigger */}
             <button
               onClick={openCart}
-              className="flex items-center gap-2 bg-studio-terracotta text-white px-4 py-2.5 rounded-full hover:bg-studio-terracottaHover transition-colors shadow-md duration-300 font-bold group whitespace-nowrap flex-shrink-0"
+              className="flex items-center gap-1.5 xl:gap-2 bg-studio-terracotta text-white px-2.5 py-1.5 sm:px-3 sm:py-2 xl:px-4 xl:py-2.5 rounded-full hover:bg-studio-terracottaHover transition-colors shadow-md duration-300 font-bold group whitespace-nowrap flex-shrink-0"
               aria-label={`Shopping bag with ${totalItemsCount} items`}
             >
-              <ShoppingBag className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
-              <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline text-white whitespace-nowrap">Bag</span>
-              <span className="bg-black/30 text-white font-mono text-xs px-2 py-0.5 rounded-full font-black">
+              <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white group-hover:scale-110 transition-transform" />
+              <span className="text-[11px] xl:text-xs font-bold uppercase tracking-wider hidden sm:inline text-white whitespace-nowrap">Bag</span>
+              <span className="bg-black/30 text-white font-mono text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-black">
                 {totalItemsCount}
               </span>
             </button>
