@@ -272,7 +272,10 @@ export const orderService = {
       })),
     };
 
-    const res = await api.post<OrderResponse | OrderConfirmationData>('/orders', apiPayload);
+    const res = await api.post<OrderResponse | OrderConfirmationData>('/orders', apiPayload, {
+      authenticated: true,
+      customerAuth: true,
+    });
     if (res && (res as OrderResponse).success && (res as OrderResponse).data) {
       return normalizeOrder((res as OrderResponse).data);
     }

@@ -10,13 +10,18 @@ import {
   ArrowLeft, 
   ShieldCheck, 
   Truck, 
-  RefreshCw,
-  Banknote,
-  Sparkles,
-  CheckCircle2,
-  QrCode,
-  Copy,
-  Check
+  RefreshCw, 
+  Banknote, 
+  Sparkles, 
+  CheckCircle2, 
+  QrCode, 
+  Copy, 
+  Check,
+  User,
+  Mail,
+  Eye,
+  EyeOff,
+  AlertCircle
 } from 'lucide-react';
 
 const isPuducherry = (stateName: string, cityName?: string): boolean => {
@@ -35,7 +40,21 @@ export const CheckoutPage: React.FC = () => {
   const { items, subtotal, discountAmount, clearCart } = useCart();
   const { navigate, setLastOrder } = useNavigation();
   const { addToast } = useToast();
-  const { customer, isLoggedIn } = useCustomerAuth();
+  const { customer, isLoggedIn, login, register, loginWithGoogle } = useCustomerAuth();
+
+  // Customer Inline Authentication States (if unauthenticated)
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authName, setAuthName] = useState('');
+  const [authPhone, setAuthPhone] = useState('');
+  const [authAddress, setAuthAddress] = useState('');
+  const [authCity, setAuthCity] = useState('');
+  const [authState, setAuthState] = useState('');
+  const [authPostalCode, setAuthPostalCode] = useState('');
+  const [showAuthPassword, setShowAuthPassword] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isAuthSubmitting, setIsAuthSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -110,8 +129,106 @@ export const CheckoutPage: React.FC = () => {
     return Object.keys(errs).length === 0;
   };
 
+  const handleInlineAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    setIsAuthSubmitting(true);
+
+    try {
+      if (authMode === 'login') {
+        if (!authEmail.trim() || !authPassword) {
+          throw new Error('Please enter both email and password.');
+        }
+        await login(authEmail.trim(), authPassword);
+        addToast({
+          title: 'Signed In Successfully! 🎨',
+          message: 'Welcome back! Your shipping details are ready.',
+          type: 'success',
+        });
+      } else {
+        if (!authName.trim() || !authEmail.trim() || !authPassword) {
+          throw new Error('Please provide your name, email, and password.');
+        }
+        if (authPassword.length < 6) {
+          throw new Error('Password must be at least 6 characters long.');
+        }
+        await register({
+          name: authName.trim(),
+          email: authEmail.trim(),
+          password: authPassword,
+          phone: authPhone.trim() || undefined,
+          address: authAddress.trim() || undefined,
+          city: authCity.trim() || undefined,
+          state: authState.trim() || undefined,
+          postalCode: authPostalCode.trim() || undefined,
+        });
+        addToast({
+          title: 'Account Created! 🚀',
+          message: 'Welcome to Stick Scape Studio! Proceed to confirm your order.',
+          type: 'success',
+        });
+      }
+    } catch (err: any) {
+      setAuthError(err.message || 'Authentication failed. Please check your credentials.');
+    } finally {
+      setIsAuthSubmitting(false);
+    }
+  };
+
+  const handleInlineGoogleAuth = async () => {
+    setAuthError(null);
+    setIsAuthSubmitting(true);
+
+    try {
+      const promptEmail = prompt(
+        'Sign in with Google Account:\nEnter your Google Email Address (or press OK to use sample Google Account):',
+        authEmail || 'collector.google@gmail.com'
+      );
+
+      if (promptEmail === null) {
+        setIsAuthSubmitting(false);
+        return;
+      }
+
+      const googleEmail = promptEmail.trim() || 'collector.google@gmail.com';
+      const googleName = googleEmail.split('@')[0].replace(/[._]/g, ' ').toUpperCase();
+      const mockGoogleId = `google_sub_${Math.abs(
+        googleEmail.split('').reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0)
+      )}`;
+
+      await loginWithGoogle({
+        googleId: mockGoogleId,
+        email: googleEmail,
+        name: googleName || 'Google Collector',
+        avatarUrl: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+          googleName
+        )}&backgroundColor=9333ea,ffffff`,
+      });
+
+      addToast({
+        title: 'Signed in with Google! 🌐',
+        message: `Welcome ${googleName}! Your Google account is connected.`,
+        type: 'success',
+      });
+    } catch (err: any) {
+      setAuthError(err.message || 'Google authentication failed. Please try again.');
+    } finally {
+      setIsAuthSubmitting(false);
+    }
+  };
+
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isLoggedIn || !customer) {
+      addToast({
+        title: 'Sign In Required',
+        message: 'You must be signed in to your customer account to place an order.',
+        type: 'error',
+      });
+      return;
+    }
+
     if (!validateForm()) {
       addToast({
         title: 'Missing Required Fields',
@@ -261,30 +378,340 @@ export const CheckoutPage: React.FC = () => {
             Manage Profile &rarr;
           </button>
         </div>
-      ) : (
-        <div className="p-4 rounded-2xl bg-studio-card/80 border border-purple-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono">
-          <div className="flex items-center gap-3">
-            <span className="p-2 rounded-xl bg-studio-sand text-purple-400 border border-purple-500/20">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-            </span>
-            <div>
-              <p className="text-studio-charcoal font-bold">Have a Stick Scape account?</p>
-              <p className="text-[11px] text-studio-muted">
-                Sign in with Google or Email for 1-click address auto-fill and instant order tracking.
-              </p>
+      ) : null}
+
+      {!isLoggedIn || !customer ? (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start animate-fadeIn">
+          {/* Left Column: Required Sign-In / Account Creation Form */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="bg-studio-card rounded-3xl p-6 sm:p-8 border border-purple-500/40 shadow-2xl space-y-6">
+              
+              {/* Header Badge & Title */}
+              <div className="space-y-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                  <Lock className="w-3.5 h-3.5" /> Sign In Required to Place Order
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-display font-black text-white">
+                  {authMode === 'login' ? 'Sign In to Your Account' : 'Create Your Customer Account'}
+                </h2>
+                <p className="text-xs text-studio-muted leading-relaxed">
+                  To ensure 100% order safety, instant WhatsApp tracking, and doorstep delivery protection, you must be signed in before completing your purchase.
+                </p>
+              </div>
+
+              {/* Mode Toggle: Sign In vs Create Account */}
+              <div className="grid grid-cols-2 p-1 bg-studio-sand rounded-2xl border border-studio-border text-xs font-mono font-bold">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('login');
+                    setAuthError(null);
+                  }}
+                  className={`py-2.5 rounded-xl transition-all ${
+                    authMode === 'login'
+                      ? 'bg-studio-terracotta text-white shadow-md'
+                      : 'text-studio-muted hover:text-white'
+                  }`}
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('register');
+                    setAuthError(null);
+                  }}
+                  className={`py-2.5 rounded-xl transition-all ${
+                    authMode === 'register'
+                      ? 'bg-studio-terracotta text-white shadow-md'
+                      : 'text-studio-muted hover:text-white'
+                  }`}
+                >
+                  Create Account
+                </button>
+              </div>
+
+              {/* Quick Google Sign-In Button */}
+              <button
+                type="button"
+                onClick={handleInlineGoogleAuth}
+                disabled={isAuthSubmitting}
+                className="w-full py-3.5 px-4 rounded-2xl bg-studio-sand hover:bg-studio-card border border-studio-border hover:border-purple-500/60 text-white text-xs font-bold font-mono transition-all flex items-center justify-center gap-3 shadow-md group disabled:opacity-50"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  />
+                </svg>
+                <span>Continue with Google</span>
+              </button>
+
+              <div className="relative flex items-center justify-center">
+                <div className="border-t border-studio-border w-full" />
+                <span className="bg-studio-card px-3 text-[10px] font-mono text-studio-muted uppercase tracking-wider absolute">
+                  Or with email
+                </span>
+              </div>
+
+              {/* Error Box */}
+              {authError && (
+                <div className="p-3.5 rounded-xl bg-red-950/40 border border-red-500/50 flex items-center gap-2.5 text-xs text-red-300">
+                  <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                  <span>{authError}</span>
+                </div>
+              )}
+
+              {/* Form Fields */}
+              <form onSubmit={handleInlineAuthSubmit} className="space-y-4">
+                {authMode === 'register' && (
+                  <div className="space-y-1">
+                    <label className="text-xs font-mono font-bold uppercase text-purple-300">
+                      Full Name *
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-studio-muted" />
+                      <input
+                        type="text"
+                        required
+                        value={authName}
+                        onChange={(e) => setAuthName(e.target.value)}
+                        placeholder="John Doe"
+                        className="w-full bg-studio-sand border border-studio-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-studio-muted focus:outline-none focus:border-studio-terracotta"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <label className="text-xs font-mono font-bold uppercase text-purple-300">
+                    Email Address *
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-studio-muted" />
+                    <input
+                      type="email"
+                      required
+                      value={authEmail}
+                      onChange={(e) => setAuthEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      className="w-full bg-studio-sand border border-studio-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-studio-muted focus:outline-none focus:border-studio-terracotta"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-mono font-bold uppercase text-purple-300">
+                    Password *
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-studio-muted" />
+                    <input
+                      type={showAuthPassword ? 'text' : 'password'}
+                      required
+                      value={authPassword}
+                      onChange={(e) => setAuthPassword(e.target.value)}
+                      placeholder={authMode === 'register' ? 'Minimum 6 characters' : 'Enter your password'}
+                      className="w-full bg-studio-sand border border-studio-border rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-studio-muted focus:outline-none focus:border-studio-terracotta"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAuthPassword(!showAuthPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-studio-muted hover:text-white"
+                    >
+                      {showAuthPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {authMode === 'register' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div className="space-y-1 sm:col-span-2">
+                      <label className="text-xs font-mono font-bold uppercase text-purple-300">
+                        Phone Number (for Delivery & Tracking)
+                      </label>
+                      <input
+                        type="tel"
+                        value={authPhone}
+                        onChange={(e) => setAuthPhone(e.target.value)}
+                        placeholder="9876543210"
+                        className="w-full bg-studio-sand border border-studio-border rounded-xl px-4 py-2.5 text-xs text-white placeholder-studio-muted focus:outline-none focus:border-studio-terracotta"
+                      />
+                    </div>
+                    <div className="space-y-1 sm:col-span-2">
+                      <label className="text-xs font-mono font-bold uppercase text-purple-300">
+                        Street Address (Optional pre-fill)
+                      </label>
+                      <input
+                        type="text"
+                        value={authAddress}
+                        onChange={(e) => setAuthAddress(e.target.value)}
+                        placeholder="Flat / House No., Landmark"
+                        className="w-full bg-studio-sand border border-studio-border rounded-xl px-4 py-2.5 text-xs text-white placeholder-studio-muted focus:outline-none focus:border-studio-terracotta"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-mono font-bold uppercase text-purple-300">
+                        City
+                      </label>
+                      <input
+                        type="text"
+                        value={authCity}
+                        onChange={(e) => setAuthCity(e.target.value)}
+                        placeholder="e.g. Puducherry"
+                        className="w-full bg-studio-sand border border-studio-border rounded-xl px-4 py-2.5 text-xs text-white placeholder-studio-muted focus:outline-none focus:border-studio-terracotta"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-mono font-bold uppercase text-purple-300">
+                        State
+                      </label>
+                      <input
+                        type="text"
+                        value={authState}
+                        onChange={(e) => setAuthState(e.target.value)}
+                        placeholder="e.g. Puducherry / Tamil Nadu"
+                        className="w-full bg-studio-sand border border-studio-border rounded-xl px-4 py-2.5 text-xs text-white placeholder-studio-muted focus:outline-none focus:border-studio-terracotta"
+                      />
+                    </div>
+                    <div className="space-y-1 sm:col-span-2">
+                      <label className="text-xs font-mono font-bold uppercase text-purple-300">
+                        Postal Code
+                      </label>
+                      <input
+                        type="text"
+                        value={authPostalCode}
+                        onChange={(e) => setAuthPostalCode(e.target.value)}
+                        placeholder="605001"
+                        className="w-full bg-studio-sand border border-studio-border rounded-xl px-4 py-2.5 text-xs text-white placeholder-studio-muted focus:outline-none focus:border-studio-terracotta"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isAuthSubmitting}
+                  className="w-full mt-2 py-4 rounded-2xl bg-studio-terracotta hover:bg-studio-terracottaHover text-white font-display font-bold text-xs uppercase tracking-wider transition-all shadow-xl flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {isAuthSubmitting ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                      <span>{authMode === 'login' ? 'Signing In...' : 'Creating Account...'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-4 h-4" />
+                      <span>
+                        {authMode === 'login' ? 'Sign In & Proceed to Shipping' : 'Create Account & Proceed'}
+                      </span>
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {/* Customer Benefits */}
+              <div className="pt-4 border-t border-studio-border grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px] font-mono text-studio-muted">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  <span>WhatsApp Tracking</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  <span>Saved Addresses</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  <span>Order Re-prints</span>
+                </div>
+              </div>
+
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => navigate('login', { redirect: 'checkout' })}
-            className="py-1.5 px-3 rounded-lg bg-studio-terracotta hover:bg-studio-terracottaHover text-white font-bold text-xs whitespace-nowrap shadow-md"
-          >
-            Sign In / Join
-          </button>
-        </div>
-      )}
 
-      <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          {/* Right Column: Order Summary Preview */}
+          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
+            <div className="bg-studio-card rounded-3xl p-6 sm:p-8 border border-studio-border shadow-2xl space-y-6">
+              <h3 className="font-display font-black text-xl text-studio-charcoal pb-4 border-b border-studio-border flex items-center justify-between">
+                <span>Order Summary</span>
+                <span className="font-mono text-xs text-purple-300 font-bold bg-studio-terracotta/20 px-2.5 py-1 rounded-full border border-purple-500/30">
+                  {items.reduce((s, i) => s + i.quantity, 0)} Items
+                </span>
+              </h3>
+
+              {/* Cart Items List */}
+              <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+                {items.map((item) => (
+                  <div key={item.cartItemId} className="flex items-center gap-3">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-12 h-12 rounded-xl object-cover border border-studio-border flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-xs text-studio-charcoal truncate">{item.name}</h4>
+                      <p className="text-[11px] text-studio-muted font-mono">
+                        {item.selectedSize.name} &bull; Qty: {item.quantity}
+                      </p>
+                    </div>
+                    <div className="font-mono font-bold text-xs text-studio-charcoal">
+                      ₹{Math.round(item.unitPrice * item.quantity)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Price Calculations */}
+              <div className="space-y-2 pt-4 border-t border-studio-border font-mono text-xs">
+                <div className="flex justify-between text-studio-muted">
+                  <span>Subtotal</span>
+                  <span className="text-studio-charcoal font-semibold">₹{Math.round(subtotal)}</span>
+                </div>
+
+                {appliedDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-400 font-semibold">
+                    <span>Discount</span>
+                    <span>-₹{Math.round(appliedDiscount)}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between text-studio-muted">
+                  <span>Estimated Shipping</span>
+                  <span className="text-studio-muted">Calculated upon address</span>
+                </div>
+
+                <div className="flex justify-between text-studio-charcoal font-bold text-base pt-3 border-t border-studio-border">
+                  <span>Estimated Total</span>
+                  <span className="text-studio-terracotta text-lg">₹{Math.round(grandTotal)}</span>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs font-mono text-amber-300 flex items-center gap-2">
+                <Lock className="w-4 h-4 flex-shrink-0" />
+                <span>Sign in or create an account to proceed with shipping &amp; payment.</span>
+              </div>
+
+              <div className="text-center text-[10px] text-studio-muted font-mono flex items-center justify-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Stick Scape Purchase Protection Guaranteed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         
         {/* Left Column: Contact, Shipping, & Payment Forms (Col 7) */}
         <div className="lg:col-span-7 space-y-8">
@@ -753,6 +1180,7 @@ export const CheckoutPage: React.FC = () => {
         </div>
 
       </form>
+      )}
 
       {/* Interactive UPI QR Payment Modal */}
       {upiModalOrder && (
