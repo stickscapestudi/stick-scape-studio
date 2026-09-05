@@ -81,16 +81,35 @@ export interface CartItem {
 
 export interface CustomerReview {
   id: string;
-  author: string;
+  customerName?: string;
+  email?: string;
+  mobile?: string;
+  productName?: string;
   rating: number;
-  date: string;
-  comment: string;
-  productTitle: string;
-  verified: boolean;
-  location: string;
-  avatar: string;
+  feedback?: string;
+  isVerified?: boolean;
+  createdAt?: string;
+  // Legacy compatibility fields
+  author?: string;
+  date?: string;
+  comment?: string;
+  productTitle?: string;
+  verified?: boolean;
+  location?: string;
+  avatar?: string;
   roomPhoto?: string;
 }
+
+
+export interface CreateReviewData {
+  customerName: string;
+  email: string;
+  mobile: string;
+  productName: string;
+  rating: number;
+  feedback: string;
+}
+
 
 export interface CustomerShippingDetails {
   firstName: string;

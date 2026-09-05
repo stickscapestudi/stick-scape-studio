@@ -419,24 +419,25 @@ export const HomePage: React.FC = () => {
                   {rev.avatar ? (
                     <img
                       src={rev.avatar}
-                      alt={rev.author}
+                      alt={rev.customerName || rev.author || 'Customer'}
                       className="w-10 h-10 rounded-full object-cover border border-purple-500/40"
                     />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-purple-950 border border-purple-500/40 text-purple-300 font-display font-bold flex items-center justify-center text-sm shadow-sm flex-shrink-0">
-                      {rev.author.charAt(0)}
+                      {(rev.customerName || rev.author || 'C').charAt(0)}
                     </div>
                   )}
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-white">{rev.author}</span>
+                      <span className="text-xs font-bold text-white">{rev.customerName || rev.author || 'Customer'}</span>
                       <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
                     </div>
                     <span className="text-[11px] text-studio-muted font-mono block">
-                      {rev.productTitle}
+                      {rev.productName || rev.productTitle}
                     </span>
                   </div>
                 </div>
+
               </div>
             ))}
           </div>

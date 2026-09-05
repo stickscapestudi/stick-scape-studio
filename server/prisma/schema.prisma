@@ -134,3 +134,21 @@ enum AuthProvider {
   LOCAL
   GOOGLE
 }
+
+model Review {
+  id           String   @id @default(uuid())
+  customerName String
+  email        String
+  mobile       String
+  productName  String
+  rating       Int      @default(5)
+  feedback     String
+  isVerified   Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([rating])
+  @@index([createdAt])
+  @@map("reviews")
+}
+

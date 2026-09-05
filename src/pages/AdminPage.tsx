@@ -4,8 +4,9 @@ import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { orderService } from '../services/order.service';
 import { adminService, type DashboardStats } from '../services/admin.service';
+import { reviewService } from '../services/review.service';
 import { ADMIN_MOBILE } from '../config/env';
-import type { OrderConfirmationData, OrderStatus } from '../types';
+import type { OrderConfirmationData, OrderStatus, CustomerReview } from '../types';
 import { 
   Package, 
   Search, 
@@ -36,7 +37,12 @@ import {
   Copy,
   Sparkles,
   Trash2,
+  Star,
+  Mail,
+  Plus,
 } from 'lucide-react';
+
+
 
 export const AdminPage: React.FC = () => {
   const { navigate } = useNavigation();
@@ -55,6 +61,31 @@ export const AdminPage: React.FC = () => {
   const [isLoadingStats, setIsLoadingStats] = useState<boolean>(false);
   const [statsError, setStatsError] = useState<string | null>(null);
 
+  // Reviews State (Consists of Customer Name, Mail ID, Mobile Number, Product Name, Star Rating, Feedback)
+  const [reviews, setReviews] = useState<CustomerReview[]>([]);
+  const [isLoadingReviews, setIsLoadingReviews] = useState<boolean>(false);
+  const [reviewSearch, setReviewSearch] = useState<string>('');
+  const [isAddReviewModalOpen, setIsAddReviewModalOpen] = useState<boolean>(false);
+  const [isReviewsCollapsed, setIsReviewsCollapsed] = useState<boolean>(false);
+
+  // New Review Form State
+  const [newReview, setNewReview] = useState<{
+    customerName: string;
+    email: string;
+    mobile: string;
+    productName: string;
+    rating: number;
+    feedback: string;
+  }>({
+    customerName: '',
+    email: '',
+    mobile: '',
+    productName: 'Customized Polaroids (Pack of 16)',
+    rating: 5,
+    feedback: '',
+  });
+  const [isSubmittingReview, setIsSubmittingReview] = useState<boolean>(false);
+
   // Dashboard Orders & Pagination State
   const [orders, setOrders] = useState<OrderConfirmationData[]>([]);
   const [page, setPage] = useState<number>(1);
@@ -68,6 +99,7 @@ export const AdminPage: React.FC = () => {
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedOrderModal, setSelectedOrderModal] = useState<OrderConfirmationData | null>(null);
+
 
   // Photo Gallery Inspector Modal State for Studio Printing Access
   const [viewingPhotoGallery, setViewingPhotoGallery] = useState<{
@@ -190,12 +222,88 @@ export const AdminPage: React.FC = () => {
     }
   }, [isAuthenticated, page, limit, searchQuery, selectedStatusFilter]);
 
+  // Fetch Reviews from Backend
+  const fetchReviews = useCallback(async () => {
+    if (!isAuthenticated) return;
+    setIsLoadingReviews(true);
+    try {
+      const data = await reviewService.getReviews();
+      setReviews(data);
+    } catch (err: any) {
+      console.error('Failed to load reviews:', err);
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  }, [isAuthenticated]);
+
   useEffect(() => {
     if (isAuthenticated) {
       fetchStats();
       fetchOrders();
+      fetchReviews();
     }
-  }, [isAuthenticated, fetchStats, fetchOrders]);
+  }, [isAuthenticated, fetchStats, fetchOrders, fetchReviews]);
+
+  const handleCreateReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReview.customerName || !newReview.email || !newReview.mobile || !newReview.productName || !newReview.feedback) {
+      addToast({
+        title: 'Missing Fields',
+        message: 'Please complete all fields (Customer Name, Mail ID, Mobile, Product, Rating, and Feedback).',
+        type: 'info',
+      });
+      return;
+    }
+    setIsSubmittingReview(true);
+    try {
+      const created = await reviewService.submitReview(newReview);
+      setReviews((prev) => [created, ...prev]);
+      setIsAddReviewModalOpen(false);
+      setNewReview({
+        customerName: '',
+        email: '',
+        mobile: '',
+        productName: 'Customized Polaroids (Pack of 16)',
+        rating: 5,
+        feedback: '',
+      });
+      addToast({
+        title: 'Customer Review Added! ⭐',
+        message: `Review for ${created.customerName || created.author} saved.`,
+        type: 'success',
+      });
+    } catch (err: any) {
+      addToast({
+        title: 'Submission Failed',
+        message: err.message || 'Failed to submit review.',
+        type: 'info',
+      });
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: string, authorName: string) => {
+    if (!window.confirm(`⚠️ Permanently delete review from ${authorName}?`)) {
+      return;
+    }
+    try {
+      await reviewService.deleteReview(reviewId);
+      setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+      addToast({
+        title: 'Review Deleted 🗑️',
+        message: `Review from ${authorName} removed.`,
+        type: 'info',
+      });
+    } catch (err: any) {
+      addToast({
+        title: 'Delete Failed',
+        message: err.message || 'Failed to delete review.',
+        type: 'info',
+      });
+    }
+  };
+
 
   // Reset page to 1 when filters change
   const handleFilterChange = (status: string) => {
@@ -554,7 +662,221 @@ export const AdminPage: React.FC = () => {
         </div>
       )}
 
+      {/* 🌟 Customer Reviews & Feedback Section at the Top */}
+      <div className="bg-studio-card rounded-3xl p-6 sm:p-8 border border-purple-500/40 shadow-xl space-y-6">
+        
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-studio-border">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-amber-500/20 text-amber-300 rounded-xl border border-amber-500/40">
+                <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+              </div>
+              <h2 className="font-display font-black text-2xl text-white">
+                Customer Reviews &amp; Feedback
+              </h2>
+              <span className="bg-purple-950 text-purple-300 text-xs font-mono font-bold px-2.5 py-1 rounded-full border border-purple-500/40">
+                {reviews.length} {reviews.length === 1 ? 'Review' : 'Reviews'}
+              </span>
+            </div>
+            <p className="text-xs text-studio-muted font-mono">
+              Live customer ratings consisting of Customer Name, Mail ID, Mobile Number, Product Name, Star Rating, and Feedback.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setIsAddReviewModalOpen(true)}
+              className="bg-studio-terracotta hover:bg-purple-400 text-black px-4 py-2.5 rounded-xl font-display font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Review</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsReviewsCollapsed(!isReviewsCollapsed)}
+              className="px-3 py-2.5 bg-studio-sand border border-studio-border text-purple-200 hover:text-white rounded-xl text-xs font-mono transition-colors"
+            >
+              {isReviewsCollapsed ? 'Expand Reviews' : 'Collapse'}
+            </button>
+          </div>
+        </div>
+
+        {!isReviewsCollapsed && (
+          <>
+            {/* Search & Average Rating Bar */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="relative w-full sm:w-80">
+                <input
+                  type="text"
+                  placeholder="Search reviews by name, email, product..."
+                  value={reviewSearch}
+                  onChange={(e) => setReviewSearch(e.target.value)}
+                  className="w-full bg-studio-sand border border-studio-border rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-studio-terracotta font-mono"
+                />
+                <Search className="w-4 h-4 text-studio-muted absolute left-3 top-2.5" />
+                {reviewSearch && (
+                  <button
+                    onClick={() => setReviewSearch('')}
+                    className="absolute right-2.5 top-2.5 text-neutral-400 hover:text-white"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 text-xs font-mono text-purple-300">
+                <span className="flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-xl border border-purple-500/30">
+                  <span>Store Average:</span>
+                  <span className="text-amber-400 font-bold flex items-center gap-1">
+                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                    {reviews.length > 0 ? (reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1) : '5.0'} / 5.0
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            {/* Reviews Grid */}
+            {isLoadingReviews ? (
+              <div className="py-12 text-center text-purple-300 font-mono space-y-2">
+                <RefreshCw className="w-6 h-6 animate-spin mx-auto text-studio-terracotta" />
+                <div>Loading customer reviews from database...</div>
+              </div>
+            ) : reviews.filter((r) => {
+                if (!reviewSearch) return true;
+                const q = reviewSearch.toLowerCase();
+                const name = (r.customerName || r.author || '').toLowerCase();
+                const email = (r.email || '').toLowerCase();
+                const mobile = (r.mobile || '').toLowerCase();
+                const prod = (r.productName || r.productTitle || '').toLowerCase();
+                const feedback = (r.feedback || r.comment || '').toLowerCase();
+                return name.includes(q) || email.includes(q) || mobile.includes(q) || prod.includes(q) || feedback.includes(q);
+              }).length === 0 ? (
+              <div className="py-10 text-center text-studio-muted font-mono bg-studio-sand/30 rounded-2xl border border-studio-border">
+                No customer reviews found matching your search.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {reviews
+                  .filter((r) => {
+                    if (!reviewSearch) return true;
+                    const q = reviewSearch.toLowerCase();
+                    const name = (r.customerName || r.author || '').toLowerCase();
+                    const email = (r.email || '').toLowerCase();
+                    const mobile = (r.mobile || '').toLowerCase();
+                    const prod = (r.productName || r.productTitle || '').toLowerCase();
+                    const feedback = (r.feedback || r.comment || '').toLowerCase();
+                    return name.includes(q) || email.includes(q) || mobile.includes(q) || prod.includes(q) || feedback.includes(q);
+                  })
+                  .map((rev) => {
+                    const author = rev.customerName || rev.author || 'Verified Customer';
+                    const email = rev.email || 'customer@example.com';
+                    const mobile = rev.mobile || '9876543210';
+                    const product = rev.productName || rev.productTitle || 'Customized Polaroids';
+                    const rating = rev.rating || 5;
+                    const feedback = rev.feedback || rev.comment || '';
+
+                    return (
+                      <div
+                        key={rev.id}
+                        className="bg-studio-sand/70 rounded-2xl p-5 border border-studio-border hover:border-purple-500/40 transition-all flex flex-col justify-between space-y-4 shadow-sm"
+                      >
+                        <div className="space-y-3">
+                          {/* Top: Star Rating + Delete Button */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1 text-amber-400 bg-black/40 px-2.5 py-1 rounded-lg border border-amber-500/30">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-3.5 h-3.5 ${i < rating ? 'fill-amber-400 text-amber-400' : 'text-neutral-600'}`}
+                                />
+                              ))}
+                              <span className="text-[11px] font-mono font-bold text-amber-300 ml-1">
+                                {rating}.0
+                              </span>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteReview(rev.id, author)}
+                              className="text-neutral-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-950/60 transition-colors"
+                              title={`Delete review from ${author}`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          {/* Product Name Tag */}
+                          <div className="inline-block bg-purple-950/80 text-purple-200 border border-purple-500/30 px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold">
+                            📦 {product}
+                          </div>
+
+                          {/* Feedback text */}
+                          <p className="text-xs text-white leading-relaxed italic bg-black/30 p-3 rounded-xl border border-white/5 font-mono">
+                            "{feedback}"
+                          </p>
+                        </div>
+
+                        {/* Customer Metadata Footer */}
+                        <div className="pt-3 border-t border-studio-border space-y-1.5 text-[11px] font-mono">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-white flex items-center gap-1.5">
+                              <span>👤 {author}</span>
+                              <span className="text-[9px] bg-emerald-950 text-emerald-400 px-1.5 py-0.2 rounded border border-emerald-500/30">Verified</span>
+                            </span>
+                          </div>
+
+                          {/* Mail ID */}
+                          <div className="flex items-center justify-between text-studio-muted">
+                            <div className="flex items-center gap-1.5 truncate max-w-[210px]">
+                              <Mail className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                              <a href={`mailto:${email}`} className="hover:text-purple-300 truncate">
+                                {email}
+                              </a>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(email, 'Mail ID')}
+                              className="text-[9px] text-purple-300 hover:text-white p-0.5"
+                              title="Copy Mail ID"
+                            >
+                              <Copy className="w-2.5 h-2.5" />
+                            </button>
+                          </div>
+
+                          {/* Mobile Number */}
+                          <div className="flex items-center justify-between text-studio-muted">
+                            <div className="flex items-center gap-1.5">
+                              <Phone className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                              <a href={`tel:${mobile}`} className="hover:text-purple-300">
+                                +91 {mobile}
+                              </a>
+                            </div>
+                            <a
+                              href={`https://wa.me/91${mobile}?text=${encodeURIComponent(`Hi ${author}, thank you for your review on Stick Scape Studio!`)}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[10px] text-emerald-400 hover:underline font-bold"
+                            >
+                              WhatsApp
+                            </a>
+                          </div>
+                        </div>
+
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
+          </>
+        )}
+
+      </div>
+
       {/* Filter and Search Controls */}
+
       <div className="bg-studio-card rounded-2xl p-4 sm:p-5 border border-studio-border shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
         
         {/* Status Filter Tabs */}
@@ -1562,9 +1884,140 @@ export const AdminPage: React.FC = () => {
                   </div>
                 </div>
               )}
-
             </div>
 
+          </div>
+        </div>
+      )}
+
+
+      {/* Dedicated Add Customer Review Modal */}
+
+      {isAddReviewModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-studio-card w-full max-w-lg rounded-3xl border border-purple-500/40 shadow-2xl p-6 sm:p-8 space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-studio-border">
+              <div className="flex items-center gap-2">
+                <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+                <h3 className="font-display font-black text-xl text-white">Add Customer Review</h3>
+              </div>
+              <button
+                onClick={() => setIsAddReviewModalOpen(false)}
+                className="p-1.5 text-neutral-400 hover:text-white rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateReview} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Customer Name */}
+                <div className="space-y-1">
+                  <label className="text-xs font-mono font-bold uppercase text-purple-200">Customer Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={newReview.customerName}
+                    onChange={(e) => setNewReview({ ...newReview, customerName: e.target.value })}
+                    placeholder="e.g. Sri Nikesh .T"
+                    className="w-full bg-studio-sand border border-studio-border rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-studio-terracotta font-mono"
+                  />
+                </div>
+
+                {/* Mail ID */}
+                <div className="space-y-1">
+                  <label className="text-xs font-mono font-bold uppercase text-purple-200">Mail ID</label>
+                  <input
+                    type="email"
+                    required
+                    value={newReview.email}
+                    onChange={(e) => setNewReview({ ...newReview, email: e.target.value })}
+                    placeholder="customer@gmail.com"
+                    className="w-full bg-studio-sand border border-studio-border rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-studio-terracotta font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Mobile Number */}
+                <div className="space-y-1">
+                  <label className="text-xs font-mono font-bold uppercase text-purple-200">Mobile Number</label>
+                  <input
+                    type="tel"
+                    required
+                    value={newReview.mobile}
+                    onChange={(e) => setNewReview({ ...newReview, mobile: e.target.value })}
+                    placeholder="e.g. 9876543210"
+                    className="w-full bg-studio-sand border border-studio-border rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-studio-terracotta font-mono"
+                  />
+                </div>
+
+                {/* Product Name */}
+                <div className="space-y-1">
+                  <label className="text-xs font-mono font-bold uppercase text-purple-200">Product Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={newReview.productName}
+                    onChange={(e) => setNewReview({ ...newReview, productName: e.target.value })}
+                    placeholder="e.g. Customized Polaroids (Pack of 16)"
+                    className="w-full bg-studio-sand border border-studio-border rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-studio-terracotta font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Star Rating */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-mono font-bold uppercase text-purple-200">Star Rating</label>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setNewReview({ ...newReview, rating: star })}
+                      className="p-1 text-amber-400 hover:scale-125 transition-transform"
+                    >
+                      <Star
+                        className={`w-6 h-6 ${star <= newReview.rating ? 'fill-amber-400 text-amber-400' : 'text-neutral-600'}`}
+                      />
+                    </button>
+                  ))}
+                  <span className="text-xs font-mono font-bold text-amber-300 ml-2">
+                    {newReview.rating} of 5 Stars
+                  </span>
+                </div>
+              </div>
+
+              {/* Feedback */}
+              <div className="space-y-1">
+                <label className="text-xs font-mono font-bold uppercase text-purple-200">Feedback</label>
+                <textarea
+                  required
+                  rows={3}
+                  value={newReview.feedback}
+                  onChange={(e) => setNewReview({ ...newReview, feedback: e.target.value })}
+                  placeholder="Enter detailed customer feedback or review comment..."
+                  className="w-full bg-studio-sand border border-studio-border rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-studio-terracotta font-mono resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddReviewModalOpen(false)}
+                  className="px-4 py-2.5 bg-studio-sand text-purple-200 hover:text-white rounded-xl text-xs font-mono transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingReview}
+                  className="px-6 py-2.5 bg-studio-terracotta hover:bg-purple-400 text-black rounded-xl font-display font-bold text-xs uppercase tracking-wider transition-colors shadow-lg disabled:opacity-50"
+                >
+                  {isSubmittingReview ? 'Saving...' : 'Submit Review'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -1572,3 +2025,4 @@ export const AdminPage: React.FC = () => {
     </div>
   );
 };
+
