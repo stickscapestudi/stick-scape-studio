@@ -20,6 +20,7 @@ import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
+import { ReviewsPage } from './pages/ReviewsPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 import { TrackOrderPage } from './pages/TrackOrderPage';
 import { AdminPage } from './pages/AdminPage';
@@ -81,6 +82,8 @@ const AppContent: React.FC = () => {
         return <AboutPage />;
       case 'contact':
         return <ContactPage />;
+      case 'reviews':
+        return <ReviewsPage />;
       case 'order-confirmation':
         return <OrderConfirmationPage />;
       case 'track-order':
@@ -95,6 +98,7 @@ const AppContent: React.FC = () => {
         return <HomePage />;
     }
   };
+
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-studio-bg selection:bg-studio-terracotta selection:text-white">

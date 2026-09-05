@@ -35,10 +35,12 @@ export const Navbar: React.FC = () => {
     { label: 'Wall Posters', page: 'posters' },
     { label: 'Polaroid Prints', page: 'polaroids' },
     { label: 'Room Bundles', page: 'shop', params: { category: 'bundles' } },
+    { label: 'Feedback & Reviews', page: 'reviews' },
     { label: 'Track Order', page: 'track-order' },
     { label: 'About Studio', page: 'about' },
     { label: 'Contact', page: 'contact' },
   ];
+
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();

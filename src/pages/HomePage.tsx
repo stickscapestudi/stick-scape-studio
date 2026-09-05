@@ -442,8 +442,20 @@ export const HomePage: React.FC = () => {
             ))}
           </div>
 
+          <div className="text-center mt-10">
+            <button
+              onClick={() => navigate('reviews')}
+              className="inline-flex items-center gap-2 bg-studio-terracotta hover:bg-purple-400 text-black px-6 py-3.5 rounded-2xl font-display font-bold text-xs uppercase tracking-wider transition-all shadow-lg"
+            >
+              <Star className="w-4 h-4 fill-black text-black" />
+              <span>Write a Review &amp; View All Customer Feedback</span>
+            </button>
+          </div>
+
+
         </div>
       </section>
+
 
     </div>
   );

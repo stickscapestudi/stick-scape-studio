@@ -11,11 +11,13 @@ export type PageRoute =
   | 'checkout'
   | 'about'
   | 'contact'
+  | 'reviews'
   | 'order-confirmation'
   | 'track-order'
   | 'login'
   | 'account'
   | 'admin';
+
 
 interface NavigationContextType {
   currentPage: PageRoute;
@@ -83,15 +85,20 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
         return { page: 'product', params: queryParams };
       }
 
+      if (pageSegment === 'feedback' || pageSegment === 'review' || pageSegment === 'reviews') {
+        return { page: 'reviews', params: queryParams };
+      }
+
       const validPages: PageRoute[] = [
         'home', 'shop', 'posters', 'polaroids', 'product',
-        'cart', 'checkout', 'about', 'contact', 'order-confirmation', 'track-order',
+        'cart', 'checkout', 'about', 'contact', 'reviews', 'order-confirmation', 'track-order',
         'login', 'account', 'admin'
       ];
 
       if (validPages.includes(pageSegment as PageRoute)) {
         return { page: pageSegment as PageRoute, params: queryParams };
       }
+
     } catch {
       // Fallback
     }

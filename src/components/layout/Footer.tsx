@@ -190,6 +190,11 @@ export const Footer: React.FC = () => {
                 </button>
               </li>
               <li>
+                <button onClick={() => navigate('reviews')} className="hover:text-studio-terracotta transition-colors text-studio-terracotta font-semibold">
+                  Customer Reviews &amp; Feedback ⭐
+                </button>
+              </li>
+              <li>
                 <button onClick={() => navigate('contact')} className="hover:text-studio-terracotta transition-colors">
                   Contact &amp; Support
                 </button>
@@ -199,6 +204,7 @@ export const Footer: React.FC = () => {
                   Frequently Asked Questions
                 </button>
               </li>
+
               <li>
                 <button onClick={() => navigate('posters')} className="hover:text-studio-terracotta transition-colors">
                   Poster Size &amp; Frame Guide
