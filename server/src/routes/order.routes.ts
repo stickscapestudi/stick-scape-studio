@@ -22,7 +22,12 @@ router.get('/', orderController.getOrders);
 // IMPORTANT ROUTE ORDER: /number/:orderNumber registered before /:id
 router.get('/number/:orderNumber', orderController.getOrderByNumber);
 router.get('/:id', orderController.getOrderById);
-
 router.patch('/:id/status', validateBody(updateOrderStatusSchema), orderController.updateOrderStatus);
 
+
+// Delete order management
+router.delete('/clear-all', orderController.clearAllOrders);
+router.delete('/:id', orderController.deleteOrder);
+
 export const orderRoutes = router;
+

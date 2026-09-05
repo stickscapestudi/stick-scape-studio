@@ -468,4 +468,48 @@ export const orderService = {
 
     return updatedOrder;
   },
+
+  /**
+   * Deletes a single order by ID or orderNumber (Admin only).
+   */
+  async deleteOrder(id: string) {
+    const existingOrder = await prisma.order.findFirst({
+      where: {
+        OR: [
+          { id },
+          { orderNumber: id },
+          { orderNumber: { equals: id, mode: 'insensitive' } },
+        ],
+      },
+    });
+
+    if (!existingOrder) {
+      throw new AppError(`Order '${id}' not found`, 404);
+    }
+
+    // Delete associated items first then the order in a transaction
+    await prisma.$transaction([
+      prisma.orderItem.deleteMany({ where: { orderId: existingOrder.id } }),
+      prisma.order.delete({ where: { id: existingOrder.id } }),
+    ]);
+
+    return { message: `Order #${existingOrder.orderNumber} successfully deleted` };
+  },
+
+  /**
+   * Clears/deletes all orders from the database (Admin only).
+   */
+  async clearAllOrders() {
+    const [deletedItems, deletedOrders] = await prisma.$transaction([
+      prisma.orderItem.deleteMany({}),
+      prisma.order.deleteMany({}),
+    ]);
+
+    return {
+      message: 'All orders successfully cleared',
+      deletedOrdersCount: deletedOrders.count,
+      deletedItemsCount: deletedItems.count,
+    };
+  },
 };
+

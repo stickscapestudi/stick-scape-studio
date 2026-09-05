@@ -88,4 +88,31 @@ export const orderController = {
       next(err);
     }
   },
+
+  async deleteOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const result = await orderService.deleteOrder(id);
+      res.json({
+        success: true,
+        message: result.message,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async clearAllOrders(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const result = await orderService.clearAllOrders();
+      res.json({
+        success: true,
+        message: result.message,
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
+

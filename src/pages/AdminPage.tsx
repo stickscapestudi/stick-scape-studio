@@ -35,6 +35,7 @@ import {
   Type,
   Copy,
   Sparkles,
+  Trash2,
 } from 'lucide-react';
 
 export const AdminPage: React.FC = () => {
@@ -228,6 +229,59 @@ export const AdminPage: React.FC = () => {
     }
   };
 
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!window.confirm(`⚠️ Permanently delete Order #${orderId}? This cannot be undone.`)) {
+      return;
+    }
+    try {
+      await orderService.deleteOrder(orderId);
+      setOrders((prev) => prev.filter((o) => o.orderId !== orderId));
+      if (selectedOrderModal?.orderId === orderId) {
+        setSelectedOrderModal(null);
+      }
+      fetchStats();
+      addToast({
+        title: 'Order Deleted 🗑️',
+        message: `Order #${orderId} has been permanently deleted.`,
+        type: 'info',
+      });
+    } catch (err: any) {
+      addToast({
+        title: 'Delete Failed',
+        message: err.message || 'Failed to delete order from server.',
+        type: 'info',
+      });
+    }
+  };
+
+  const handleClearAllOrders = async () => {
+    if (!window.confirm('⚠️ Are you sure you want to delete ALL orders from the database? This action is irreversible.')) {
+      return;
+    }
+    try {
+      await orderService.clearAllOrders();
+      setOrders([]);
+      setTotalOrdersCount(0);
+      setTotalPages(1);
+      if (selectedOrderModal) {
+        setSelectedOrderModal(null);
+      }
+      fetchStats();
+      addToast({
+        title: 'All Orders Cleared 🗑️',
+        message: 'All previous orders have been permanently cleared from the database.',
+        type: 'success',
+      });
+    } catch (err: any) {
+      addToast({
+        title: 'Clear Failed',
+        message: err.message || 'Failed to clear orders from database.',
+        type: 'info',
+      });
+    }
+  };
+
+
   const triggerTestSmsNotification = () => {
     const msg = `⚡ *NEW ORDER RECEIVED - STICK SCAPE STUDIO*\n\n📦 Order ID: SSS-894210\n👤 Customer: Demo User\n📞 Admin Phone: +91 ${ADMIN_MOBILE}\n💰 Total Amount: ₹799.00\n📍 City: Chennai, TN\n\nDispatch pending in Admin Portal.`;
     const encoded = encodeURIComponent(msg);
@@ -380,6 +434,18 @@ export const AdminPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          {totalOrdersCount > 0 && (
+            <button
+              onClick={handleClearAllOrders}
+              disabled={isLoadingOrders}
+              className="px-3.5 py-2.5 bg-rose-950/70 hover:bg-rose-900 border border-rose-500/40 text-rose-300 hover:text-white text-xs font-mono font-bold rounded-xl transition-colors flex items-center gap-1.5 shadow-sm"
+              title="Permanently remove all orders from database"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Clear All Orders</span>
+            </button>
+          )}
+
           <button
             onClick={() => {
               fetchStats();
@@ -400,6 +466,7 @@ export const AdminPage: React.FC = () => {
             <span>Sign Out</span>
           </button>
         </div>
+
       </div>
 
       {/* Mobile Alert Notification Card */}
@@ -875,7 +942,17 @@ export const AdminPage: React.FC = () => {
                           >
                             WhatsApp
                           </a>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteOrder(order.orderId)}
+                            className="p-2 bg-rose-950/60 text-rose-400 border border-rose-500/40 hover:bg-rose-900 hover:text-white rounded-lg transition-colors text-xs font-mono"
+                            title={`Delete Order #${order.orderId}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
+
                       </td>
 
                     </tr>
@@ -1210,13 +1287,23 @@ export const AdminPage: React.FC = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-3 pt-2 flex-wrap sm:flex-nowrap">
+              <button
+                type="button"
+                onClick={() => handleDeleteOrder(selectedOrderModal.orderId)}
+                className="px-4 py-3 bg-rose-950/70 hover:bg-rose-900 border border-rose-500/40 text-rose-300 hover:text-white rounded-xl font-display font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5"
+                title="Delete this order permanently"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Delete</span>
+              </button>
+
               <button
                 onClick={() => window.print()}
                 className="flex-1 bg-studio-sand hover:bg-studio-terracotta hover:text-black text-purple-200 py-3 rounded-xl font-display font-bold text-xs uppercase tracking-wider transition-colors border border-studio-border flex items-center justify-center gap-2"
               >
                 <Printer className="w-4 h-4" />
-                <span>Print Packing Slip</span>
+                <span>Print Slip</span>
               </button>
 
               <a
@@ -1226,9 +1313,10 @@ export const AdminPage: React.FC = () => {
                 className="flex-1 bg-studio-terracotta text-black hover:bg-purple-400 py-3 rounded-xl font-display font-bold text-xs uppercase tracking-wider transition-colors shadow-md flex items-center justify-center gap-2"
               >
                 <Send className="w-4 h-4 text-black" />
-                <span>Open WhatsApp Slip (+91 {ADMIN_MOBILE})</span>
+                <span>Open WhatsApp</span>
               </a>
             </div>
+
 
           </div>
         </div>

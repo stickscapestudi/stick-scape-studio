@@ -297,4 +297,29 @@ export const orderService = {
     }
     return normalizeOrder(res);
   },
+
+  /**
+   * Deletes a single order by ID or orderNumber.
+   * Requires Admin Authentication.
+   */
+  async deleteOrder(orderId: string): Promise<{ success: boolean; message: string }> {
+    const res = await api.delete<{ success: boolean; message: string }>(`/orders/${orderId}`, {
+      authenticated: true,
+      adminAuth: true,
+    });
+    return res;
+  },
+
+  /**
+   * Clears all orders from the database.
+   * Requires Admin Authentication.
+   */
+  async clearAllOrders(): Promise<{ success: boolean; message: string; data?: any }> {
+    const res = await api.delete<{ success: boolean; message: string; data?: any }>('/orders/clear-all', {
+      authenticated: true,
+      adminAuth: true,
+    });
+    return res;
+  },
 };
+
