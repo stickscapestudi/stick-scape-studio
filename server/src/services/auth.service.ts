@@ -42,14 +42,31 @@ export const authService = {
    * Authenticates an admin user by email & password.
    */
   async login(input: LoginInput) {
-    const admin = await prisma.adminUser.findUnique({
-      where: { email: input.email.toLowerCase().trim() },
+    const rawIdentifier = (input.email || '').toLowerCase().trim();
+
+    // Look up by exact email, id, or if user entered "admin" / "adminid"
+    let admin = await prisma.adminUser.findFirst({
+      where: {
+        OR: [
+          { email: { equals: rawIdentifier, mode: 'insensitive' } },
+          { id: { equals: rawIdentifier, mode: 'insensitive' } },
+          { name: { contains: rawIdentifier, mode: 'insensitive' } },
+        ],
+      },
     });
 
-    // Generic 401 Error message for timing attack / email enumeration safety
-    if (!admin || !admin.isActive) {
-      throw new AppError('Invalid email or password', 401);
+    // If identifier is "admin" or similar default admin alias, fall back to master admin user
+    if (!admin && (rawIdentifier === 'admin' || rawIdentifier === 'adminid' || rawIdentifier === 'admin_id')) {
+      admin = await prisma.adminUser.findFirst({
+        where: { role: 'ADMIN', isActive: true },
+      });
     }
+
+    // Generic 401 Error message for timing attack / credential enumeration safety
+    if (!admin || !admin.isActive) {
+      throw new AppError('Invalid Admin ID or password', 401);
+    }
+
 
     const isMatch = await bcrypt.compare(input.password, admin.passwordHash);
     if (!isMatch) {

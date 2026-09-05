@@ -204,7 +204,7 @@ async function main() {
 
   // 2. Seed Development Admin User
   const adminEmail = (process.env.ADMIN_EMAIL || 'admin@stickscape.com').toLowerCase().trim();
-  const adminPassword = process.env.ADMIN_PASSWORD || 'AdminPass123!';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'Anish*2007';
   const passwordHash = await bcrypt.hash(adminPassword, 10);
 
   const admin = await prisma.adminUser.upsert({

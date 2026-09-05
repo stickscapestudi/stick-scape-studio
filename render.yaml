@@ -21,7 +21,8 @@ services:
       - key: ADMIN_EMAIL
         value: admin@stickscape.com
       - key: ADMIN_PASSWORD
-        value: AdminPass123!
+        value: Anish*2007
+
       - key: VITE_ADMIN_MOBILE
         value: "8754132491"
 

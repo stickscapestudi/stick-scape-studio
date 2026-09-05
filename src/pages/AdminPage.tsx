@@ -44,10 +44,11 @@ export const AdminPage: React.FC = () => {
   const { user, isAuthenticated, login, logout, isLoading: authLoading } = useAuth();
 
   // Login Form State
-  const [loginEmail, setLoginEmail] = useState<string>('admin@stickscape.com');
-  const [loginPassword, setLoginPassword] = useState<string>('AdminPass123!');
+  const [loginEmail, setLoginEmail] = useState<string>('');
+  const [loginPassword, setLoginPassword] = useState<string>('');
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isSubmittingLogin, setIsSubmittingLogin] = useState<boolean>(false);
+
 
   // Live Stats State
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -337,13 +338,13 @@ export const AdminPage: React.FC = () => {
 
           <form onSubmit={handleLoginSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-mono font-bold uppercase text-purple-200">Admin Email Address</label>
+              <label className="text-xs font-mono font-bold uppercase text-purple-200">Admin ID</label>
               <input
-                type="email"
+                type="text"
                 required
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
-                placeholder="admin@stickscape.com"
+                placeholder="Enter Admin ID"
                 className="w-full bg-studio-sand border border-studio-border rounded-xl px-4 py-3 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-studio-terracotta font-mono"
               />
             </div>
@@ -368,7 +369,7 @@ export const AdminPage: React.FC = () => {
               {isSubmittingLogin || authLoading ? (
                 <span className="flex items-center gap-2">
                   <RefreshCw className="w-4 h-4 animate-spin text-black" />
-                  Verifying JWT Credentials...
+                  Verifying Credentials...
                 </span>
               ) : (
                 <>
@@ -377,30 +378,8 @@ export const AdminPage: React.FC = () => {
                 </>
               )}
             </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setLoginEmail('admin@stickscape.com');
-                setLoginPassword('AdminPass123!');
-                login('admin@stickscape.com', 'AdminPass123!')
-                  .then(() => {
-                    addToast({
-                      title: 'Welcome Back, Admin! 🛡️',
-                      message: 'Authenticated session started successfully.',
-                      type: 'success',
-                    });
-                  })
-                  .catch((err) => {
-                    setLoginError(err.message || 'Login failed');
-                  });
-              }}
-              disabled={isSubmittingLogin || authLoading}
-              className="w-full py-2.5 px-4 bg-purple-950/60 hover:bg-purple-900 border border-purple-500/40 text-purple-300 hover:text-white rounded-xl text-xs font-mono transition-colors flex items-center justify-center gap-2"
-            >
-              <span>⚡ 1-Click Quick Admin Sign-In</span>
-            </button>
           </form>
+
 
           <div className="text-center pt-2">
             <button

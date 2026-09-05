@@ -41,7 +41,7 @@ const envSchema = z.object({
     .transform((val) => (val && val.length >= 8 ? val : 'stick_scape_studio_jwt_secret_key_super_secret_2026')),
   JWT_EXPIRES_IN: z.string().optional().default('7d'),
   ADMIN_EMAIL: z.string().optional().default('admin@stickscape.com'),
-  ADMIN_PASSWORD: z.string().optional().default('AdminPass123!'),
+  ADMIN_PASSWORD: z.string().optional().default('Anish*2007'),
   PAYMENT_PROVIDER: z
     .string()
     .optional()
@@ -70,10 +70,11 @@ export const env = _env.success
       JWT_SECRET: process.env.JWT_SECRET || 'stick_scape_studio_jwt_secret_key_super_secret_2026',
       JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
       ADMIN_EMAIL: process.env.ADMIN_EMAIL || 'admin@stickscape.com',
-      ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || 'AdminPass123!',
+      ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || 'Anish*2007',
       PAYMENT_PROVIDER: ((process.env.PAYMENT_PROVIDER === 'razorpay' ? 'razorpay' : 'development') as 'development' | 'razorpay'),
       RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || '',
       RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || '',
       RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET || '',
     };
+
 
