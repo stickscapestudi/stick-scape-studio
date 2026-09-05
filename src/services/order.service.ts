@@ -82,14 +82,25 @@ function normalizeOrder(raw: any): OrderConfirmationData {
     ? raw.items.map((item: any) => {
         let uploadedPhotos: string[] = [];
         let customCaption: string | undefined = undefined;
+        let customCaptions: string[] | undefined = undefined;
         let songUrl: string | undefined = undefined;
+        let songUrls: string[] | undefined = undefined;
 
         // Try extracting from product description or item fields
         if (Array.isArray(item.uploadedPhotos) && item.uploadedPhotos.length > 0) {
           uploadedPhotos = item.uploadedPhotos;
         } else if (Array.isArray(item.images) && item.images.length > 0) {
           uploadedPhotos = item.images;
-        } else if (item.product?.description && typeof item.product.description === 'string' && item.product.description.startsWith('{')) {
+        }
+
+        if (Array.isArray(item.customCaptions)) {
+          customCaptions = item.customCaptions;
+        }
+        if (Array.isArray(item.songUrls)) {
+          songUrls = item.songUrls;
+        }
+
+        if (item.product?.description && typeof item.product.description === 'string' && item.product.description.startsWith('{')) {
           try {
             const parsed = JSON.parse(item.product.description);
             if (Array.isArray(parsed.photos)) {
@@ -100,7 +111,13 @@ function normalizeOrder(raw: any): OrderConfirmationData {
             } else if (parsed.title) {
               customCaption = `${parsed.title}${parsed.subtitle ? ' — ' + parsed.subtitle : ''}`;
             }
+            if (Array.isArray(parsed.captions)) {
+              customCaptions = parsed.captions;
+            }
             if (parsed.songUrl) songUrl = parsed.songUrl;
+            if (Array.isArray(parsed.songUrls)) {
+              songUrls = parsed.songUrls;
+            }
           } catch {}
         }
 
@@ -120,7 +137,9 @@ function normalizeOrder(raw: any): OrderConfirmationData {
           images: uploadedPhotos,
           uploadedPhotos: uploadedPhotos,
           customCaption: customCaption || item.customCaption,
+          customCaptions: customCaptions || item.customCaptions,
           songUrl: songUrl || item.songUrl,
+          songUrls: songUrls || item.songUrls,
           selectedSize: item.selectedSize || { id: 'sz-default', name: 'Standard Scale', dimensions: '11x17 in', priceMultiplier: 1.0, inStock: true },
           quantity: Number(item.quantity || 1),
         };
@@ -246,7 +265,9 @@ export const orderService = {
         images: i.images || (i as any).uploadedPhotos,
         uploadedPhotos: i.uploadedPhotos || i.images,
         customCaption: i.customCaption,
+        customCaptions: i.customCaptions,
         songUrl: i.songUrl,
+        songUrls: i.songUrls,
         description: i.customDescription || (i as any).description,
       })),
     };

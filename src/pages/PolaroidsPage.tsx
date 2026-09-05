@@ -13,7 +13,8 @@ import {
   Plus,
   ChevronLeft,
   ChevronRight,
-  CheckCircle2
+  CheckCircle2,
+  Copy
 } from 'lucide-react';
 
 type BottomPrintMode = 'caption' | 'song';
@@ -36,8 +37,24 @@ export const PolaroidsPage: React.FC = () => {
   const [uploadedImages, setUploadedImages] = useState<string[]>(['/vtv-polaroid.jpg']);
   const [activePreviewIndex, setActivePreviewIndex] = useState<number>(0);
   const [bottomMode, setBottomMode] = useState<BottomPrintMode>('caption');
-  const [customCaption, setCustomCaption] = useState('Enter your Caption');
-  const [songUrl, setSongUrl] = useState('https://open.spotify.com/track/hosanna-vtv');
+  
+  // Multi-item captions (up to 32 items)
+  const [captions, setCaptions] = useState<string[]>(() => {
+    const arr = Array(32).fill('');
+    arr[0] = 'Enter your Caption';
+    return arr;
+  });
+
+  // Multi-item song URLs (up to 32 items)
+  const [songUrls, setSongUrls] = useState<string[]>(() => {
+    const arr = Array(32).fill('');
+    arr[0] = 'https://open.spotify.com/track/hosanna-vtv';
+    return arr;
+  });
+
+  // Bulk Apply-to-all inputs
+  const [bulkCaption, setBulkCaption] = useState('');
+  const [bulkSongUrl, setBulkSongUrl] = useState('');
   const [customBorder] = useState(POLAROID_FINISHES[0]);
 
   const requiredCount = getRequiredPhotoCount(selectedPack.id);
@@ -51,6 +68,54 @@ export const PolaroidsPage: React.FC = () => {
         setActivePreviewIndex(0);
       }
     }
+  };
+
+  const handleCaptionChange = (index: number, value: string) => {
+    setCaptions((prev) => {
+      const updated = [...prev];
+      updated[index] = value;
+      return updated;
+    });
+  };
+
+  const handleSongUrlChange = (index: number, value: string) => {
+    setSongUrls((prev) => {
+      const updated = [...prev];
+      updated[index] = value;
+      return updated;
+    });
+  };
+
+  const handleApplyCaptionToAll = (captionToApply: string) => {
+    const text = captionToApply.trim() || 'Custom Photo';
+    setCaptions((prev) => {
+      const updated = [...prev];
+      for (let i = 0; i < requiredCount; i++) {
+        updated[i] = text;
+      }
+      return updated;
+    });
+    addToast({
+      title: 'Caption Applied to All! ✨',
+      message: `Applied "${text}" to all ${requiredCount} polaroids in this pack.`,
+      type: 'success',
+    });
+  };
+
+  const handleApplySongToAll = (songToApply: string) => {
+    const url = songToApply.trim() || 'https://open.spotify.com';
+    setSongUrls((prev) => {
+      const updated = [...prev];
+      for (let i = 0; i < requiredCount; i++) {
+        updated[i] = url;
+      }
+      return updated;
+    });
+    addToast({
+      title: 'Song URL Applied to All! 🎵',
+      message: `Applied song track link to all ${requiredCount} polaroids in this pack.`,
+      type: 'success',
+    });
   };
 
   const handleFilesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,15 +169,59 @@ export const PolaroidsPage: React.FC = () => {
       '/aesthetic.jpeg',
       '/logo.jpeg',
     ];
+
+    const demoCaptionsPool = [
+      'VTV Vibes 🎞️',
+      'Golden Hour ✨',
+      'Anbil Avan 🎵',
+      'Yuvan Magic 🎧',
+      'Harris Melody 🌊',
+      'Kaatru Veliyidai ☁️',
+      'GOAT Moments ⚽',
+      'El Clasico 🏆',
+      'Unnale Unnale 💫',
+      'Katchi Sera 🌟',
+      'Vintage 35mm 📸',
+      'Retro Memories 🎞️',
+      'Sunset Aesthetic 🌅',
+      'Stick Scape Cut ✂️',
+      'Aesthetic Noir 🖤',
+      'Nostalgia Lane 🌿',
+    ];
+
+    const demoSongsPool = [
+      'https://open.spotify.com/track/hosanna-vtv',
+      'https://open.spotify.com/track/adada-mazhaida',
+      'https://open.spotify.com/track/ar-rahman-melody',
+      'https://open.spotify.com/track/yuvan-drugs',
+      'https://open.spotify.com/track/harris-masterpiece',
+      'https://open.spotify.com/track/sarattu-vandiyila',
+      'https://open.spotify.com/track/katchi-sera',
+      'https://open.spotify.com/track/aasa-kooda',
+    ];
+
     const filled: string[] = [];
+    const filledCaptions: string[] = [...captions];
+    const filledSongUrls: string[] = [...songUrls];
+
     for (let i = 0; i < requiredCount; i++) {
       filled.push(demoPool[i % demoPool.length]);
+      if (!filledCaptions[i] || filledCaptions[i] === 'Enter your Caption') {
+        filledCaptions[i] = demoCaptionsPool[i % demoCaptionsPool.length];
+      }
+      if (!filledSongUrls[i]) {
+        filledSongUrls[i] = demoSongsPool[i % demoSongsPool.length];
+      }
     }
+
     setUploadedImages(filled);
+    setCaptions(filledCaptions);
+    setSongUrls(filledSongUrls);
     setActivePreviewIndex(0);
+
     addToast({
-      title: `Auto-Filled ${requiredCount} Demo Photos! ✨`,
-      message: `All ${requiredCount} photo slots are loaded for ${selectedPack.name}.`,
+      title: `Auto-Filled ${requiredCount} Demo Photos & Style! ✨`,
+      message: `All ${requiredCount} photo slots & captions are loaded for ${selectedPack.name}.`,
       type: 'success',
     });
   };
@@ -129,8 +238,11 @@ export const PolaroidsPage: React.FC = () => {
 
   const handleAddCustomToBag = () => {
     const isSong = bottomMode === 'song';
-    const effectiveCaption = isSong ? undefined : (customCaption.trim() || 'Custom Photo');
-    const effectiveSong = isSong ? (songUrl.trim() || 'https://open.spotify.com') : undefined;
+    const activeCaptionsList = captions.slice(0, requiredCount).map((c, i) => c.trim() || (i === 0 ? 'Custom Photo' : `Memory #${i + 1}`));
+    const activeSongList = songUrls.slice(0, requiredCount).map((s) => s.trim() || 'https://open.spotify.com');
+
+    const primaryCaption = isSong ? undefined : activeCaptionsList[0];
+    const primarySong = isSong ? activeSongList[0] : undefined;
 
     if (uploadedImages.length < requiredCount) {
       addToast({
@@ -144,8 +256,8 @@ export const PolaroidsPage: React.FC = () => {
     const customProduct = {
       id: 'custom-polaroid-pack-' + Date.now(),
       name: isSong
-        ? `Custom Polaroid (${selectedPack.name.split('(')[0].trim()} • Song Embed)`
-        : `Custom Polaroid (${selectedPack.name.split('(')[0].trim()} • ${effectiveCaption})`,
+        ? `Custom Polaroid (${selectedPack.name.split('(')[0].trim()} • ${requiredCount > 1 ? `${requiredCount} Songs` : 'Song Embed'})`
+        : `Custom Polaroid (${selectedPack.name.split('(')[0].trim()} • ${requiredCount > 1 ? `${requiredCount} Custom Captions` : primaryCaption})`,
       slug: 'custom-polaroid-pack',
       category: 'polaroids' as const,
       theme: 'Retro Film' as const,
@@ -161,14 +273,18 @@ export const PolaroidsPage: React.FC = () => {
         packSize: selectedPack.name,
         photoCount: requiredCount,
         bottomMode,
-        caption: effectiveCaption,
-        songUrl: effectiveSong,
+        caption: primaryCaption,
+        captions: isSong ? undefined : activeCaptionsList,
+        songUrl: primarySong,
+        songUrls: isSong ? activeSongList : undefined,
         photos: uploadedImages,
       }),
-      customCaption: effectiveCaption,
-      songUrl: effectiveSong,
+      customCaption: primaryCaption,
+      customCaptions: isSong ? undefined : activeCaptionsList,
+      songUrl: primarySong,
+      songUrls: isSong ? activeSongList : undefined,
       uploadedPhotos: uploadedImages,
-      shortDescription: `${selectedPack.name.split('(')[0].trim()} with ${uploadedImages.length} custom photo(s) & ${isSong ? 'song embed' : 'caption'}.`,
+      shortDescription: `${selectedPack.name.split('(')[0].trim()} with ${uploadedImages.length} custom photo(s) & ${isSong ? (requiredCount > 1 ? `${requiredCount} song embeds` : 'song embed') : (requiredCount > 1 ? `${requiredCount} captions` : 'caption')}.`,
       images: uploadedImages,
       sizes: POLAROID_PACK_SIZES,
       finishes: POLAROID_FINISHES,
@@ -359,36 +475,222 @@ export const PolaroidsPage: React.FC = () => {
                 </button>
               </div>
 
-              {/* Dynamic Input Based on Selection */}
-              {bottomMode === 'caption' ? (
-                <div className="space-y-1.5 animate-fadeIn">
-                  <input
-                    type="text"
-                    maxLength={40}
-                    placeholder="Enter your Caption"
-                    value={customCaption}
-                    onChange={(e) => setCustomCaption(e.target.value)}
-                    className="w-full bg-studio-sand border border-studio-border rounded-xl px-4 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-studio-terracotta font-mono"
-                  />
-                  <p className="text-[11px] text-studio-muted font-mono">
-                    ✍️ Printed in our aesthetic vintage handwritten font across the bottom margin.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-1.5 animate-fadeIn">
-                  <div className="relative">
+              {/* Single Polaroid Print Input (Pack of 1) */}
+              {requiredCount === 1 ? (
+                bottomMode === 'caption' ? (
+                  <div className="space-y-1.5 animate-fadeIn">
                     <input
-                      type="url"
-                      placeholder="Paste Song URL (e.g. https://open.spotify.com/track/...)"
-                      value={songUrl}
-                      onChange={(e) => setSongUrl(e.target.value)}
-                      className="w-full bg-studio-sand border border-studio-border rounded-xl px-4 py-2.5 pl-10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-studio-terracotta font-mono"
+                      type="text"
+                      maxLength={40}
+                      placeholder="Enter your Caption"
+                      value={captions[0] || ''}
+                      onChange={(e) => handleCaptionChange(0, e.target.value)}
+                      className="w-full bg-studio-sand border border-studio-border rounded-xl px-4 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-studio-terracotta font-mono"
                     />
-                    <Music className="w-4 h-4 text-purple-400 absolute left-3.5 top-3" />
+                    <p className="text-[11px] text-studio-muted font-mono">
+                      ✍️ Printed in our aesthetic vintage handwritten font across the bottom margin.
+                    </p>
                   </div>
-                  <p className="text-[11px] text-studio-muted font-mono">
-                    🎵 We'll print a scannable Spotify music soundwave and track code on the bottom margin!
-                  </p>
+                ) : (
+                  <div className="space-y-1.5 animate-fadeIn">
+                    <div className="relative">
+                      <input
+                        type="url"
+                        placeholder="Paste Song URL (e.g. https://open.spotify.com/track/...)"
+                        value={songUrls[0] || ''}
+                        onChange={(e) => handleSongUrlChange(0, e.target.value)}
+                        className="w-full bg-studio-sand border border-studio-border rounded-xl px-4 py-2.5 pl-10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-studio-terracotta font-mono"
+                      />
+                      <Music className="w-4 h-4 text-purple-400 absolute left-3.5 top-3" />
+                    </div>
+                    <p className="text-[11px] text-studio-muted font-mono">
+                      🎵 We'll print a scannable Spotify music soundwave and track code on the bottom margin!
+                    </p>
+                  </div>
+                )
+              ) : (
+                /* Multi-Polaroid Inputs for Pack of 16 / Pack of 32 */
+                <div className="space-y-3.5 animate-fadeIn">
+                  
+                  {/* Quick Bulk "Apply to All" Tool */}
+                  <div className="bg-purple-950/40 border border-purple-500/30 rounded-2xl p-3.5 space-y-2.5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-purple-200">
+                        <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                        <span>Apply One {bottomMode === 'caption' ? 'Caption' : 'Song URL'} to All {requiredCount} Polaroids:</span>
+                      </div>
+                      {bottomMode === 'caption' && captions[0] && (
+                        <button
+                          type="button"
+                          onClick={() => handleApplyCaptionToAll(captions[0])}
+                          className="text-[10px] font-mono font-bold text-purple-300 hover:text-white bg-purple-900/60 hover:bg-purple-800 px-2 py-0.5 rounded-lg transition-colors border border-purple-500/30 flex items-center gap-1"
+                          title="Use Photo #1 caption for all polaroids"
+                        >
+                          <Copy className="w-2.5 h-2.5" />
+                          <span>Copy #1 to All</span>
+                        </button>
+                      )}
+                      {bottomMode === 'song' && songUrls[0] && (
+                        <button
+                          type="button"
+                          onClick={() => handleApplySongToAll(songUrls[0])}
+                          className="text-[10px] font-mono font-bold text-purple-300 hover:text-white bg-purple-900/60 hover:bg-purple-800 px-2 py-0.5 rounded-lg transition-colors border border-purple-500/30 flex items-center gap-1"
+                          title="Use Photo #1 song URL for all polaroids"
+                        >
+                          <Copy className="w-2.5 h-2.5" />
+                          <span>Copy #1 to All</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      {bottomMode === 'caption' ? (
+                        <input
+                          type="text"
+                          maxLength={40}
+                          placeholder={`Type a caption to apply across all ${requiredCount} polaroids...`}
+                          value={bulkCaption}
+                          onChange={(e) => setBulkCaption(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && bulkCaption.trim()) {
+                              handleApplyCaptionToAll(bulkCaption);
+                            }
+                          }}
+                          className="flex-1 bg-studio-sand border border-studio-border rounded-xl px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-400 font-mono"
+                        />
+                      ) : (
+                        <div className="relative flex-1">
+                          <input
+                            type="url"
+                            placeholder={`Paste Spotify/Song link to apply across all ${requiredCount} polaroids...`}
+                            value={bulkSongUrl}
+                            onChange={(e) => setBulkSongUrl(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && bulkSongUrl.trim()) {
+                                handleApplySongToAll(bulkSongUrl);
+                              }
+                            }}
+                            className="w-full bg-studio-sand border border-studio-border rounded-xl px-3.5 py-2 pl-9 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-400 font-mono"
+                          />
+                          <Music className="w-3.5 h-3.5 text-purple-400 absolute left-3 top-2.5" />
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (bottomMode === 'caption') {
+                            handleApplyCaptionToAll(bulkCaption || captions[0] || 'Custom Photo');
+                          } else {
+                            handleApplySongToAll(bulkSongUrl || songUrls[0] || 'https://open.spotify.com');
+                          }
+                        }}
+                        className="bg-studio-terracotta hover:bg-purple-400 text-black font-bold font-mono text-xs px-3.5 py-2 rounded-xl transition-all shadow-sm flex-shrink-0 flex items-center gap-1.5 active:scale-95"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-black" />
+                        <span>Apply to All ({requiredCount})</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Individual Polaroid List for all 16 or 32 items */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-purple-200 font-bold">
+                      <span>Individual Polaroid {bottomMode === 'caption' ? 'Captions' : 'Song URLs'} ({requiredCount} total):</span>
+                      <span className="text-studio-muted font-normal text-[10px]">Click any row to live preview</span>
+                    </div>
+
+                    <div className="max-h-72 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+                      {Array.from({ length: requiredCount }).map((_, idx) => {
+                        const photoImg = uploadedImages[idx] || uploadedImages[0] || '/vtv-polaroid.jpg';
+                        const isPreviewing = activePreviewIndex === idx;
+                        const currentCap = captions[idx] ?? '';
+                        const currentSong = songUrls[idx] ?? '';
+
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => setActivePreviewIndex(idx)}
+                            className={`p-2 rounded-xl border transition-all flex items-center gap-2.5 cursor-pointer ${
+                              isPreviewing
+                                ? 'bg-purple-950/70 border-purple-500 ring-1 ring-purple-500/50 shadow-sm'
+                                : 'bg-studio-sand/40 border-studio-border hover:border-purple-400/40 hover:bg-studio-sand/70'
+                            }`}
+                          >
+                            {/* Photo Thumbnail + Index Badge */}
+                            <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-purple-400/40 flex-shrink-0">
+                              <img src={photoImg} alt={`#${idx + 1}`} className="w-full h-full object-cover" />
+                              <span className="absolute bottom-0 left-0 right-0 bg-black/85 text-[8px] font-mono font-bold text-center text-white py-0.2">
+                                #{idx + 1}
+                              </span>
+                            </div>
+
+                            {/* Text Input */}
+                            <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
+                              {bottomMode === 'caption' ? (
+                                <input
+                                  type="text"
+                                  maxLength={40}
+                                  placeholder={`Caption for Polaroid #${idx + 1} (e.g. Memory #${idx + 1})`}
+                                  value={currentCap}
+                                  onFocus={() => setActivePreviewIndex(idx)}
+                                  onChange={(e) => handleCaptionChange(idx, e.target.value)}
+                                  className="w-full bg-studio-sand/90 border border-studio-border rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-400 font-mono"
+                                />
+                              ) : (
+                                <div className="relative">
+                                  <input
+                                    type="url"
+                                    placeholder={`Song URL for #${idx + 1} (Spotify link)...`}
+                                    value={currentSong}
+                                    onFocus={() => setActivePreviewIndex(idx)}
+                                    onChange={(e) => handleSongUrlChange(idx, e.target.value)}
+                                    className="w-full bg-studio-sand/90 border border-studio-border rounded-lg px-2.5 py-1.5 pl-7 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-400 font-mono"
+                                  />
+                                  <Music className="w-3 h-3 text-purple-400 absolute left-2 top-2" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Quick Row Actions */}
+                            <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                              {((bottomMode === 'caption' && currentCap.trim()) || (bottomMode === 'song' && currentSong.trim())) && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (bottomMode === 'caption') {
+                                      handleApplyCaptionToAll(currentCap);
+                                    } else {
+                                      handleApplySongToAll(currentSong);
+                                    }
+                                  }}
+                                  className="px-2 py-1 bg-studio-sand hover:bg-purple-900 text-purple-300 hover:text-white rounded-lg border border-studio-border transition-colors text-[10px] font-mono flex items-center gap-1"
+                                  title={`Apply #${idx + 1} ${bottomMode === 'caption' ? 'caption' : 'song URL'} to all ${requiredCount} polaroids`}
+                                >
+                                  <Copy className="w-2.5 h-2.5" />
+                                  <span>To All</span>
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() => setActivePreviewIndex(idx)}
+                                className={`px-2 py-1 rounded-lg text-[10px] font-mono transition-colors font-bold ${
+                                  isPreviewing
+                                    ? 'bg-purple-600 text-white'
+                                    : 'text-purple-300 hover:text-white hover:bg-studio-sand'
+                                }`}
+                                title="Preview on frame"
+                              >
+                                {isPreviewing ? 'Live' : 'View'}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                 </div>
               )}
             </div>
@@ -450,51 +752,58 @@ export const PolaroidsPage: React.FC = () => {
               <div className="washi-tape" />
               
               {/* Polaroid Frame Container with switching animation */}
-              <div 
-                key={`${uploadedImages[activePreviewIndex] || '/vtv-polaroid.jpg'}-${bottomMode}-${bottomMode === 'caption' ? customCaption : songUrl}`}
-                className="w-72 sm:w-80 p-4 pb-7 rounded-md shadow-2xl bg-white text-neutral-800 transition-all duration-300 transform rotate-1 hover:rotate-0 animate-tabSwitch border border-neutral-200/60"
-              >
-                {/* Photo Center */}
-                <div className="aspect-square w-full overflow-hidden rounded-sm bg-neutral-100 shadow-inner">
-                  <img
-                    src={uploadedImages[activePreviewIndex] || uploadedImages[0] || '/vtv-polaroid.jpg'}
-                    alt="Custom Polaroid Preview"
-                    className="w-full h-full object-cover transition-all duration-300"
-                  />
-                </div>
+              {(() => {
+                const currentPreviewCaption = captions[activePreviewIndex] || (activePreviewIndex === 0 ? 'Enter your Caption' : `Polaroid #${activePreviewIndex + 1}`);
+                const currentPreviewSong = songUrls[activePreviewIndex] || songUrls[0] || 'https://open.spotify.com/track/hosanna-vtv';
 
-                {/* Bottom Footer: EITHER Caption OR Scannable Song Bar */}
-                {bottomMode === 'caption' ? (
-                  <div className="mt-4 text-center">
-                    <div className="font-serif italic text-base tracking-wide px-2 truncate text-neutral-900">
-                      {customCaption || 'Enter your Caption'}
+                return (
+                  <div 
+                    key={`${uploadedImages[activePreviewIndex] || '/vtv-polaroid.jpg'}-${bottomMode}-${bottomMode === 'caption' ? currentPreviewCaption : currentPreviewSong}-${activePreviewIndex}`}
+                    className="w-72 sm:w-80 p-4 pb-7 rounded-md shadow-2xl bg-white text-neutral-800 transition-all duration-300 transform rotate-1 hover:rotate-0 animate-tabSwitch border border-neutral-200/60"
+                  >
+                    {/* Photo Center */}
+                    <div className="aspect-square w-full overflow-hidden rounded-sm bg-neutral-100 shadow-inner">
+                      <img
+                        src={uploadedImages[activePreviewIndex] || uploadedImages[0] || '/vtv-polaroid.jpg'}
+                        alt="Custom Polaroid Preview"
+                        className="w-full h-full object-cover transition-all duration-300"
+                      />
                     </div>
-                    <div className="mt-1 font-mono text-[9px] text-neutral-400 uppercase tracking-widest">
-                      STICK SCAPE &bull; 350 GSM RESIN
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mt-4 flex flex-col items-center justify-center gap-1 bg-neutral-100/90 py-2 px-3 rounded-lg border border-neutral-200 mx-1">
-                    <div className="flex items-center gap-1.5 w-full justify-center">
-                      <Music className="w-3.5 h-3.5 text-purple-700 animate-pulse flex-shrink-0" />
-                      <div className="flex items-center gap-0.5 h-3">
-                        <span className="w-0.5 h-2 bg-purple-700 rounded-full animate-bounce"></span>
-                        <span className="w-0.5 h-3 bg-purple-700 rounded-full animate-pulse"></span>
-                        <span className="w-0.5 h-1.5 bg-purple-700 rounded-full"></span>
-                        <span className="w-0.5 h-3 bg-purple-700 rounded-full animate-pulse"></span>
-                        <span className="w-0.5 h-2 bg-purple-700 rounded-full"></span>
-                        <span className="w-0.5 h-3.5 bg-purple-700 rounded-full animate-bounce"></span>
-                        <span className="w-0.5 h-1.5 bg-purple-700 rounded-full"></span>
-                        <span className="w-0.5 h-2.5 bg-purple-700 rounded-full animate-pulse"></span>
-                        <span className="w-0.5 h-2 bg-purple-700 rounded-full"></span>
+
+                    {/* Bottom Footer: EITHER Caption OR Scannable Song Bar */}
+                    {bottomMode === 'caption' ? (
+                      <div className="mt-4 text-center">
+                        <div className="font-serif italic text-base tracking-wide px-2 truncate text-neutral-900" title={currentPreviewCaption}>
+                          {currentPreviewCaption}
+                        </div>
+                        <div className="mt-1 font-mono text-[9px] text-neutral-400 uppercase tracking-widest">
+                          STICK SCAPE &bull; PHOTO #{activePreviewIndex + 1} OF {requiredCount}
+                        </div>
                       </div>
-                    </div>
-                    <span className="font-mono text-[9px] text-neutral-600 truncate max-w-[200px]">
-                      {songUrl.replace(/^https?:\/\/(www\.)?/, '') || 'spotify.com/track/...'}
-                    </span>
+                    ) : (
+                      <div className="mt-4 flex flex-col items-center justify-center gap-1 bg-neutral-100/90 py-2 px-3 rounded-lg border border-neutral-200 mx-1">
+                        <div className="flex items-center gap-1.5 w-full justify-center">
+                          <Music className="w-3.5 h-3.5 text-purple-700 animate-pulse flex-shrink-0" />
+                          <div className="flex items-center gap-0.5 h-3">
+                            <span className="w-0.5 h-2 bg-purple-700 rounded-full animate-bounce"></span>
+                            <span className="w-0.5 h-3 bg-purple-700 rounded-full animate-pulse"></span>
+                            <span className="w-0.5 h-1.5 bg-purple-700 rounded-full"></span>
+                            <span className="w-0.5 h-3 bg-purple-700 rounded-full animate-pulse"></span>
+                            <span className="w-0.5 h-2 bg-purple-700 rounded-full"></span>
+                            <span className="w-0.5 h-3.5 bg-purple-700 rounded-full animate-bounce"></span>
+                            <span className="w-0.5 h-1.5 bg-purple-700 rounded-full"></span>
+                            <span className="w-0.5 h-2.5 bg-purple-700 rounded-full animate-pulse"></span>
+                            <span className="w-0.5 h-2 bg-purple-700 rounded-full"></span>
+                          </div>
+                        </div>
+                        <span className="font-mono text-[9px] text-neutral-600 truncate max-w-[200px]" title={currentPreviewSong}>
+                          {currentPreviewSong.replace(/^https?:\/\/(www\.)?/, '') || 'spotify.com/track/...'}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              })()}
             </div>
 
             {/* Carousel Navigator if multiple photos exist */}

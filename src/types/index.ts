@@ -50,6 +50,11 @@ export interface Product {
   isBestSeller?: boolean;
   isFeatured?: boolean;
   bundleItemsCount?: number;
+  customCaption?: string;
+  customCaptions?: string[];
+  songUrl?: string;
+  songUrls?: string[];
+  uploadedPhotos?: string[];
   paperSpecs: string;
   inventoryCount: number;
 }
@@ -65,7 +70,9 @@ export interface CartItem {
   images?: string[];
   uploadedPhotos?: string[];
   customCaption?: string;
+  customCaptions?: string[];
   songUrl?: string;
+  songUrls?: string[];
   customDescription?: string;
   selectedSize: ProductSize;
   selectedFinish?: ProductFinish;

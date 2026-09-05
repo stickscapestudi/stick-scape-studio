@@ -72,7 +72,9 @@ export const AdminPage: React.FC = () => {
     item: any;
     photos: string[];
     caption?: string;
+    captions?: string[];
     songUrl?: string;
+    songUrls?: string[];
   } | null>(null);
   const [activePhotoIdx, setActivePhotoIdx] = useState<number>(0);
 
@@ -665,7 +667,9 @@ export const AdminPage: React.FC = () => {
                                             item,
                                             photos,
                                             caption: item.customCaption,
+                                            captions: item.customCaptions,
                                             songUrl: item.songUrl,
+                                            songUrls: item.songUrls,
                                           });
                                           setActivePhotoIdx(0);
                                         }}
@@ -691,7 +695,9 @@ export const AdminPage: React.FC = () => {
                                               item,
                                               photos,
                                               caption: item.customCaption,
+                                              captions: item.customCaptions,
                                               songUrl: item.songUrl,
+                                              songUrls: item.songUrls,
                                             });
                                             setActivePhotoIdx(pIdx);
                                           }}
@@ -956,7 +962,9 @@ export const AdminPage: React.FC = () => {
                                           item,
                                           photos,
                                           caption: item.customCaption,
+                                          captions: item.customCaptions,
                                           songUrl: item.songUrl,
+                                          songUrls: item.songUrls,
                                         });
                                         setActivePhotoIdx(pIdx);
                                       }}
@@ -1094,16 +1102,22 @@ export const AdminPage: React.FC = () => {
                   <span className="text-purple-300 font-bold block">
                     Photo #{activePhotoIdx + 1} &bull; Format: High-Res Original
                   </span>
-                  {viewingPhotoGallery.caption && (
-                    <span className="text-studio-muted block">
-                      Printed Caption: <strong className="text-white italic">"{viewingPhotoGallery.caption}"</strong>
-                    </span>
-                  )}
-                  {viewingPhotoGallery.songUrl && (
-                    <span className="text-studio-muted block">
-                      Spotify Song Embed: <strong className="text-white">{viewingPhotoGallery.songUrl}</strong>
-                    </span>
-                  )}
+                  {(() => {
+                    const specificCaption = viewingPhotoGallery.captions?.[activePhotoIdx] || viewingPhotoGallery.caption;
+                    return specificCaption ? (
+                      <span className="text-studio-muted block">
+                        Printed Caption {viewingPhotoGallery.captions && viewingPhotoGallery.captions.length > 1 ? `(#${activePhotoIdx + 1})` : ''}: <strong className="text-white italic">"{specificCaption}"</strong>
+                      </span>
+                    ) : null;
+                  })()}
+                  {(() => {
+                    const specificSong = viewingPhotoGallery.songUrls?.[activePhotoIdx] || viewingPhotoGallery.songUrl;
+                    return specificSong ? (
+                      <span className="text-studio-muted block">
+                        Spotify Song Embed {viewingPhotoGallery.songUrls && viewingPhotoGallery.songUrls.length > 1 ? `(#${activePhotoIdx + 1})` : ''}: <strong className="text-white">{specificSong}</strong>
+                      </span>
+                    ) : null;
+                  })()}
                 </div>
 
                 <div className="flex items-center gap-2">
