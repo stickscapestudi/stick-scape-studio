@@ -86,20 +86,20 @@ export const HomePage: React.FC = () => {
                 <div className="absolute -top-6 -left-6 sm:-top-8 sm:-left-8 z-20 w-44 sm:w-52 polaroid-card rounded-md shadow-2xl transform -rotate-6 hover:rotate-0 transition-transform duration-300">
                   <div className="washi-tape" />
                   <img
-                    src="/aesthetic.jpeg"
-                    alt="Aesthetic polaroid sample"
+                    src="/hero-rockstar-flame.jpg"
+                    alt="Rockstar Live Concert polaroid"
                     className="w-full aspect-[4/5] object-cover rounded-sm"
                   />
                   <div className="mt-2 text-center font-mono text-[10px] text-purple-300">
-                    Aesthetic Room #04 &bull; 35mm
+                    Rockstar Live &bull; 35mm
                   </div>
                 </div>
 
                 {/* Main Hero Poster Frame */}
                 <div className="poster-frame w-full max-w-sm sm:max-w-md mx-auto aspect-[3/4] overflow-hidden rounded-lg shadow-2xl relative group">
                   <img
-                    src="/varanam ayiram.jpeg"
-                    alt="Vaaranam Aayiram Wall Art Poster"
+                    src="/hero-suriya-aesthetic.png"
+                    alt="Suriya Aesthetic Wall Art Poster"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute bottom-4 left-4 right-4 bg-studio-card/95 backdrop-blur-md text-white p-3 rounded-xl border border-purple-500/40 flex items-center justify-between">
@@ -120,12 +120,12 @@ export const HomePage: React.FC = () => {
                 <div className="absolute -bottom-6 -right-4 sm:-bottom-8 sm:-right-6 z-20 w-40 sm:w-48 polaroid-card rounded-md shadow-2xl transform rotate-6 hover:rotate-0 transition-transform duration-300">
                   <div className="washi-tape" />
                   <img
-                    src="/unnale unnale.jpeg"
-                    alt="Unnale Unnale polaroid sample"
+                    src="/hero-moon-knight.png"
+                    alt="Moon Knight polaroid sample"
                     className="w-full aspect-[4/5] object-cover rounded-sm"
                   />
                   <div className="mt-2 text-center font-mono text-[10px] text-purple-300">
-                    Unnale Unnale #12
+                    Moon Knight #12
                   </div>
                 </div>
 
