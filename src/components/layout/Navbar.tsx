@@ -34,6 +34,7 @@ export const Navbar: React.FC = () => {
     { label: 'All Art', page: 'shop' },
     { label: 'Wall Posters', page: 'posters' },
     { label: 'Polaroid Prints', page: 'polaroids' },
+    { label: 'Bouquet', page: 'bouquets' },
     { label: 'Room Bundles', page: 'shop', params: { category: 'bundles' } },
     { label: 'Feedback & Reviews', page: 'reviews' },
     { label: 'Track Order', page: 'track-order' },

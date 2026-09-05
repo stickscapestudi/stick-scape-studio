@@ -166,9 +166,27 @@ export const CartDrawer: React.FC = () => {
                         {item.selectedSize.name}
                       </p>
 
+                      {item.wrappingStyle && (
+                        <p className="text-[11px] text-purple-300 font-medium truncate">
+                          &bull; Wrap: {item.wrappingStyle}
+                        </p>
+                      )}
+
                       {item.selectedFinish && (
                         <p className="text-[11px] text-purple-400 font-medium truncate">
                           &bull; {item.selectedFinish.name}
+                        </p>
+                      )}
+
+                      {item.fairyLights && (
+                        <p className="text-[11px] text-amber-300 font-mono font-medium truncate">
+                          ✨ + Fairy Lights Glow
+                        </p>
+                      )}
+
+                      {item.giftNote && (
+                        <p className="text-[10px] text-studio-muted italic truncate font-serif">
+                          Card: "{item.giftNote}"
                         </p>
                       )}
                     </div>

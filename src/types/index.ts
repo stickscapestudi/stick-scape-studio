@@ -1,4 +1,4 @@
-export type ProductCategory = 'posters' | 'polaroids' | 'bundles';
+export type ProductCategory = 'posters' | 'polaroids' | 'bundles' | 'bouquets';
 
 export type AestheticTheme = 
   | 'All'
@@ -9,6 +9,7 @@ export type AestheticTheme =
   | 'Botanical & Nature' 
   | 'Cyberpunk & Neon' 
   | 'Vintage Music'
+  | 'Handmade Florals'
   | 'Abstract & Bauhaus';
 
 export interface ProductSize {
@@ -55,7 +56,11 @@ export interface Product {
   songUrl?: string;
   songUrls?: string[];
   uploadedPhotos?: string[];
-  paperSpecs: string;
+  giftNote?: string;
+  wrappingStyle?: string;
+  fairyLights?: boolean;
+  paperSpecs?: string;
+  bouquetSpecs?: string;
   inventoryCount: number;
 }
 
@@ -73,6 +78,11 @@ export interface CartItem {
   customCaptions?: string[];
   songUrl?: string;
   songUrls?: string[];
+  giftNote?: string;
+  wrappingStyle?: string;
+  ribbonColor?: string;
+  fairyLights?: boolean;
+  bouquetStyle?: string;
   customDescription?: string;
   selectedSize: ProductSize;
   selectedFinish?: ProductFinish;

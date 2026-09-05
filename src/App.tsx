@@ -15,6 +15,7 @@ import { HomePage } from './pages/HomePage';
 import { ShopPage } from './pages/ShopPage';
 import { PostersPage } from './pages/PostersPage';
 import { PolaroidsPage } from './pages/PolaroidsPage';
+import { BouquetPage } from './pages/BouquetPage';
 import { ProductDetailsPage } from './pages/ProductDetailsPage';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
@@ -72,6 +73,8 @@ const AppContent: React.FC = () => {
         return <PostersPage />;
       case 'polaroids':
         return <PolaroidsPage />;
+      case 'bouquets':
+        return <BouquetPage />;
       case 'product':
         return <ProductDetailsPage />;
       case 'cart':

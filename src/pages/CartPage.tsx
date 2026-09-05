@@ -162,9 +162,24 @@ export const CartPage: React.FC = () => {
                     <div className="text-xs font-mono text-studio-muted">
                       {item.selectedSize.name} &bull; <span className="text-purple-200">{item.selectedSize.dimensions}</span>
                     </div>
+                    {item.wrappingStyle && (
+                      <div className="text-[11px] text-purple-300 font-medium">
+                        Wrapping: {item.wrappingStyle}
+                      </div>
+                    )}
                     {item.selectedFinish && (
                       <div className="text-[11px] text-purple-300 font-medium">
-                        Border / Finish: {item.selectedFinish.name}
+                        Ribbon / Finish: {item.selectedFinish.name}
+                      </div>
+                    )}
+                    {item.fairyLights && (
+                      <div className="text-[11px] text-amber-300 font-mono font-medium">
+                        ✨ + Fairy Lights Glow Added
+                      </div>
+                    )}
+                    {item.giftNote && (
+                      <div className="text-[11px] text-studio-muted font-serif italic">
+                        Gift Card: "{item.giftNote}"
                       </div>
                     )}
                     <div className="font-mono text-xs text-white font-semibold sm:hidden pt-1">

@@ -10,7 +10,8 @@ import {
   Leaf, 
   Star, 
   CheckCircle2, 
-  Flame
+  Flame,
+  Flower2
 } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
@@ -21,6 +22,7 @@ export const HomePage: React.FC = () => {
   // Filtered products for sections
   const featuredPosters = SAMPLE_PRODUCTS.filter(p => p.category === 'posters' && (activePosterTab === 'All' || p.theme.includes(activePosterTab)));
   const bestSellers = SAMPLE_PRODUCTS.filter(p => p.isBestSeller);
+  const featuredBouquets = SAMPLE_PRODUCTS.filter(p => p.category === 'bouquets');
 
   return (
     <div className="space-y-24">
@@ -324,7 +326,39 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 6. WHY CHOOSE US */}
+      {/* 6. HANDMADE FOREVER BOUQUETS SPOTLIGHT */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-reveal">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+          <div>
+            <div className="inline-flex items-center gap-1.5 font-mono text-xs text-purple-400 uppercase font-bold tracking-wider">
+              <Flower2 className="w-3.5 h-3.5 text-purple-400" /> Artisan Floral Keepsakes
+            </div>
+            <h2 className="font-display font-black text-3xl sm:text-4xl text-white mt-1">
+              Handmade Forever Bouquets 🌸
+            </h2>
+            <p className="text-sm text-studio-muted mt-1 max-w-lg">
+              Milk-cotton crochet tulips, glowing butterfly fairy light arrangements, and memory Polaroid photo bouquets. Zero maintenance, stays forever fresh.
+            </p>
+          </div>
+
+          <button
+            onClick={() => navigate('bouquets')}
+            className="inline-flex items-center gap-2 bg-studio-terracotta text-black hover:bg-purple-400 px-6 py-3 rounded-2xl font-display font-bold text-xs uppercase tracking-wider transition-all shadow-md self-start md:self-auto"
+          >
+            <span>Open Bouquet Studio</span>
+            <ArrowRight className="w-4 h-4 text-black" />
+          </button>
+        </div>
+
+        {/* Bouquet Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {featuredBouquets.slice(0, 4).map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </section>
+
+      {/* 7. WHY CHOOSE US */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-reveal">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <span className="font-mono text-xs uppercase tracking-widest text-purple-400 font-bold">

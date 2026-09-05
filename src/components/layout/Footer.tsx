@@ -166,6 +166,11 @@ export const Footer: React.FC = () => {
                 </button>
               </li>
               <li>
+                <button onClick={() => navigate('bouquets')} className="hover:text-studio-terracotta transition-colors">
+                  Handmade Forever Bouquets 🌸
+                </button>
+              </li>
+              <li>
                 <button onClick={() => navigate('shop', { category: 'bundles' })} className="hover:text-studio-terracotta transition-colors">
                   Gallery Wall Bundles
                 </button>

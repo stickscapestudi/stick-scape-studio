@@ -29,6 +29,13 @@ export const BUNDLE_SIZES: ProductSize[] = [
   { id: 'bundle-deluxe', name: 'Deluxe Makeover (3 A2 Posters + 32 Polaroids + Lights)', dimensions: 'Full Bedroom Gallery', priceMultiplier: 1.5, inStock: true },
 ];
 
+/* ✏️ SIZES FOR HANDMADE BOUQUETS */
+export const BOUQUET_SIZES: ProductSize[] = [
+  { id: 'bouquet-petite', name: 'Petite Bloom (3-Stem Sweetheart Pack)', dimensions: 'Compact 25 × 18 cm Gift Wrap', priceMultiplier: 1.0, inStock: true },
+  { id: 'bouquet-classic', name: 'Classic Luxe Bloom (7-Stem Full Arrangement)', dimensions: 'Standard 35 × 26 cm Luxury Wrap', priceMultiplier: 499 / 299, inStock: true },
+  { id: 'bouquet-grand', name: 'Grand Statement Bloom (12 Stems + Warm Fairy Lights)', dimensions: 'Grand 45 × 32 cm Keepsake Bouquet', priceMultiplier: 799 / 299, inStock: true },
+];
+
 /* ✏️ FRAMING & FINISH OPTIONS FOR POSTERS (IN RUPEES) */
 export const POSTER_FINISHES: ProductFinish[] = [
   { id: 'unframed-matte', name: 'Unframed Archival Matte (300 GSM)', priceAdd: 0, description: 'Velvety heavy cotton rag that hangs crisp without glare.' },
@@ -42,6 +49,14 @@ export const POLAROID_FINISHES: ProductFinish[] = [
   { id: 'finish-classic-white', name: 'Classic Polaroid White Border', priceAdd: 0, description: 'Iconic wide bottom border with subtle vintage cream warmth.' },
   { id: 'finish-film-vintage', name: 'Aged 35mm Warm Tone Border', priceAdd: 49, description: 'Warm sepia-tinted borders with subtle analog edge markings.' },
   { id: 'finish-matte-black', name: 'Midnight Noir Black Border', priceAdd: 69, description: 'Deep dark photo borders for bold cyberpunk and mood shots.' },
+];
+
+/* ✏️ RIBBON & WRAP OPTIONS FOR BOUQUETS (IN RUPEES) */
+export const BOUQUET_FINISHES: ProductFinish[] = [
+  { id: 'finish-satin-champagne', name: 'Champagne Gold Satin Bow', priceAdd: 0, description: 'Lustrous soft gold silk ribbon tied in classic studio loop.' },
+  { id: 'finish-velvet-noir', name: 'Midnight Velvet Noir Bow', priceAdd: 29, description: 'Dramatic deep black velvet ribbon for contrast and moody elegance.' },
+  { id: 'finish-blush-rose', name: 'Blush Rose Petal Silk Bow', priceAdd: 29, description: 'Romantic double-tied soft pastel pink ribbon.' },
+  { id: 'finish-emerald-velvet', name: 'Forest Emerald Velvet Bow', priceAdd: 49, description: 'Vintage rich dark emerald velvet for a luxury botanical look.' },
 ];
 
 /* ✏️ MAIN PRODUCT LIST — Configured with Rupees (₹) Amounts */
@@ -443,6 +458,114 @@ export const SAMPLE_PRODUCTS: Product[] = [
     bundleItemsCount: 2,
     paperSpecs: '300 GSM Archival Fine Art Rag Paper',
     inventoryCount: 30,
+  },
+  {
+    id: 'prod-bq-01',
+    name: 'Pastel Dreams — Artisan Hand-Crocheted Tulip & Daisy Bouquet',
+    slug: 'pastel-dreams-crochet-tulip-bouquet',
+    category: 'bouquets',
+    theme: 'Handmade Florals',
+    price: 349.00,
+    tags: ['Handmade', 'Forever Bloom', 'Zero Maintenance', 'Bestseller'],
+    description: 'Each petal and leaf is individually hand-knitted by studio artisans with milk-cotton yarn. Features vibrant pastel pink and lavender tulips surrounded by delicate white daisies. Never wilts, stays forever fresh on your study desk or bedside table.',
+    shortDescription: 'Everlasting artisan milk-cotton hand-crocheted tulip & daisy floral bouquet.',
+    images: [
+      '/crochet-tulip-bouquet.jpg',
+    ],
+    mockupImages: {
+      flat: '/crochet-tulip-bouquet.jpg',
+      wall: '/crochet-tulip-bouquet.jpg',
+      detail: '/crochet-tulip-bouquet.jpg',
+    },
+    sizes: BOUQUET_SIZES,
+    finishes: BOUQUET_FINISHES,
+    rating: 5.0,
+    reviewCount: 47,
+    isBestSeller: true,
+    isFeatured: true,
+    bouquetSpecs: '100% Premium Milk Cotton Yarn, Flexible Wire Stems, Dual-Layer Lilac Kraft Wrap',
+    inventoryCount: 25,
+  },
+  {
+    id: 'prod-bq-02',
+    name: 'Midnight Starlight — Butterfly & Fairy Light Glowing Bloom Bouquet',
+    slug: 'midnight-starlight-butterfly-fairy-bouquet',
+    category: 'bouquets',
+    theme: 'Handmade Florals',
+    price: 449.00,
+    tags: ['Fairy Lights', 'Glowing Decor', 'Gift Ready', 'Staff Pick'],
+    description: 'A magical aesthetic arrangement crafted with iridescent shimmer butterflies, soft cream peony blooms, and delicate baby’s breath wrapped in midnight noir wrap with embedded warm copper wire LED fairy lights.',
+    shortDescription: 'Ethereal fairy light glowing floral bouquet with iridescent butterflies.',
+    images: [
+      '/butterfly-glow-bouquet.jpg',
+    ],
+    mockupImages: {
+      flat: '/butterfly-glow-bouquet.jpg',
+      wall: '/butterfly-glow-bouquet.jpg',
+      detail: '/butterfly-glow-bouquet.jpg',
+    },
+    sizes: BOUQUET_SIZES,
+    finishes: BOUQUET_FINISHES,
+    rating: 4.9,
+    reviewCount: 38,
+    isBestSeller: true,
+    isFeatured: true,
+    bouquetSpecs: 'Iridescent Laser Cut Butterflies, Silk Peony Blooms, 20 LED Micro Copper Lights',
+    inventoryCount: 20,
+  },
+  {
+    id: 'prod-bq-03',
+    name: 'Cherished Moments — Polaroid Photo Memory Flower Bouquet',
+    slug: 'cherished-moments-polaroid-memory-bouquet',
+    category: 'bouquets',
+    theme: 'Handmade Florals',
+    price: 399.00,
+    tags: ['Personalized', 'Custom Photos', 'Mini Polaroids', 'Romantic Gift'],
+    description: 'The ultimate gift that blends flowers and lasting memories. Features pastel roses, eucalyptus, and baby’s breath with 5 custom miniature Polaroid photo cards clipped to the stems using natural mini wooden pegs.',
+    shortDescription: 'Fresh floral bouquet with custom miniature Polaroid photo cards attached.',
+    images: [
+      '/polaroid-memory-bouquet.jpg',
+    ],
+    mockupImages: {
+      flat: '/polaroid-memory-bouquet.jpg',
+      wall: '/polaroid-memory-bouquet.jpg',
+      detail: '/polaroid-memory-bouquet.jpg',
+    },
+    sizes: BOUQUET_SIZES,
+    finishes: BOUQUET_FINISHES,
+    rating: 5.0,
+    reviewCount: 62,
+    isBestSeller: true,
+    isFeatured: true,
+    bouquetSpecs: 'Artisan Faux Silk Roses + Eucalyptus, 5 Mini Polaroid Prints, Mini Wooden Clothespins',
+    inventoryCount: 30,
+  },
+  {
+    id: 'prod-bq-04',
+    name: 'French Countryside — Vintage Preserved Lavender & Cotton Bouquet',
+    slug: 'french-countryside-dried-lavender-cotton-bouquet',
+    category: 'bouquets',
+    theme: 'Botanical & Nature',
+    price: 299.00,
+    tags: ['Naturally Preserved', 'Organic', 'Aroma Fresh', 'Rustic'],
+    description: '100% real naturally dried and preserved botanical bouquet featuring calming French lavender, fluffy white cotton blossoms, dried eucalyptus, and baby’s breath. Wrapped in textured organic brown kraft paper with natural jute twine.',
+    shortDescription: 'Naturally dried lavender, cotton, and eucalyptus rustic bouquet.',
+    images: [
+      '/vintage-dried-bouquet.jpg',
+    ],
+    mockupImages: {
+      flat: '/vintage-dried-bouquet.jpg',
+      wall: '/vintage-dried-bouquet.jpg',
+      detail: '/vintage-dried-bouquet.jpg',
+    },
+    sizes: BOUQUET_SIZES,
+    finishes: BOUQUET_FINISHES,
+    rating: 4.8,
+    reviewCount: 29,
+    isBestSeller: false,
+    isFeatured: true,
+    bouquetSpecs: '100% Naturally Preserved Real Flowers, Natural Lavender Scent, Eco Kraft Packaging',
+    inventoryCount: 18,
   }
 ];
 

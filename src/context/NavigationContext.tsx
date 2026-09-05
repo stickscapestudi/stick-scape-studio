@@ -6,6 +6,7 @@ export type PageRoute =
   | 'shop'
   | 'posters'
   | 'polaroids'
+  | 'bouquets'
   | 'product'
   | 'cart'
   | 'checkout'
@@ -89,8 +90,12 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
         return { page: 'reviews', params: queryParams };
       }
 
+      if (pageSegment === 'bouquet' || pageSegment === 'bouquets') {
+        return { page: 'bouquets', params: queryParams };
+      }
+
       const validPages: PageRoute[] = [
-        'home', 'shop', 'posters', 'polaroids', 'product',
+        'home', 'shop', 'posters', 'polaroids', 'bouquets', 'product',
         'cart', 'checkout', 'about', 'contact', 'reviews', 'order-confirmation', 'track-order',
         'login', 'account', 'admin'
       ];

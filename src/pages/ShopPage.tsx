@@ -46,6 +46,7 @@ export const ShopPage: React.FC = () => {
     'Botanical & Nature',
     'Cyberpunk & Neon',
     'Vintage Music',
+    'Handmade Florals',
     'Abstract & Bauhaus'
   ];
 
@@ -123,7 +124,7 @@ export const ShopPage: React.FC = () => {
           <p className="text-sm text-studio-muted leading-relaxed">
             {showWishlistOnly
               ? 'Items you have saved to your personal collection. Ready to make your walls look stunning?'
-              : 'Browse our complete library of 300 GSM posters, 35mm Polaroid card packs, and gallery bundles.'}
+              : 'Browse our complete library of 300 GSM posters, 35mm Polaroid card packs, handmade forever bouquets, and gallery bundles.'}
           </p>
         </div>
       </div>
@@ -137,6 +138,7 @@ export const ShopPage: React.FC = () => {
             { id: 'all', label: 'All Art' },
             { id: 'posters', label: 'Wall Posters' },
             { id: 'polaroids', label: 'Polaroid Packs' },
+            { id: 'bouquets', label: 'Bouquets 🌸' },
             { id: 'bundles', label: 'Room Bundles' },
           ].map((cat) => (
             <button

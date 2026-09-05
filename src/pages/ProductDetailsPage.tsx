@@ -214,12 +214,16 @@ export const ProductDetailsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* 2. Border Style Selector (Only for Polaroids if applicable) */}
-            {product.category === 'polaroids' && product.finishes && product.finishes.length > 0 && (
+            {/* 2. Finish / Ribbon / Border Style Selector */}
+            {product.finishes && product.finishes.length > 0 && (
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-mono uppercase font-bold text-purple-200">
-                    2. Border Style:
+                    {product.category === 'bouquets'
+                      ? '2. Luxury Ribbon Bow:'
+                      : product.category === 'polaroids'
+                      ? '2. Border Style:'
+                      : '2. Frame / Finish Option:'}
                   </span>
                   <span className="font-mono text-studio-muted text-[11px]">
                     {selectedFinish?.priceAdd === 0 ? 'Standard Included' : `+₹${selectedFinish?.priceAdd}`}
@@ -340,9 +344,18 @@ export const ProductDetailsPage: React.FC = () => {
               </button>
               {activeAccordion === 'specs' && (
                 <div className="mt-3 text-studio-muted leading-relaxed space-y-2 animate-fadeIn">
-                  <p><strong className="text-white">Material:</strong> {product.paperSpecs}</p>
-                  <p><strong className="text-white">Ink Type:</strong> 12-Color archival pigment formulation with ultra-deep black depth and micro-gradient fidelity.</p>
-                  <p><strong className="text-white">Archival Life:</strong> 80+ years fade resistance under standard indoor conditions.</p>
+                  <p><strong className="text-white">Material &amp; Craft:</strong> {product.bouquetSpecs || product.paperSpecs}</p>
+                  {product.category === 'bouquets' ? (
+                    <>
+                      <p><strong className="text-white">Care &amp; Longevity:</strong> 100% Everlasting bloom. No watering, wilting, or sunlight required.</p>
+                      <p><strong className="text-white">Packaging:</strong> Gift-ready luxury protective box with custom handwritten gift note card included.</p>
+                    </>
+                  ) : (
+                    <>
+                      <p><strong className="text-white">Ink Type:</strong> 12-Color archival pigment formulation with ultra-deep black depth and micro-gradient fidelity.</p>
+                      <p><strong className="text-white">Archival Life:</strong> 80+ years fade resistance under standard indoor conditions.</p>
+                    </>
+                  )}
                 </div>
               )}
             </div>
