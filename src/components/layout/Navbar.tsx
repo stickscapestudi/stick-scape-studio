@@ -15,7 +15,6 @@ import {
   LogOut,
   Package,
   MapPin,
-  ShieldCheck,
 } from 'lucide-react';
 import { SAMPLE_PRODUCTS } from '../../data/products';
 
@@ -435,17 +434,6 @@ export const Navbar: React.FC = () => {
               >
                 <span className="flex items-center gap-2"><Heart className="w-4 h-4 text-studio-terracotta" /> Saved Favorites</span>
                 <span className="font-mono text-xs bg-studio-terracotta text-white font-bold px-2 py-0.5 rounded-full">{wishlistCount}</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  navigate('admin');
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full py-2.5 px-4 rounded-xl bg-purple-950/40 hover:bg-purple-900 border border-purple-500/30 flex items-center justify-between text-xs font-mono text-purple-300 hover:text-white transition-colors"
-              >
-                <span className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-studio-terracotta" /> Admin Management Hub</span>
-                <span>&rarr;</span>
               </button>
               
               <div className="text-xs text-studio-muted font-mono leading-relaxed">

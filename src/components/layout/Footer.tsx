@@ -4,12 +4,12 @@ import { useToast } from '../../context/ToastContext';
 import { 
   ArrowRight, 
   Check, 
-  ShieldCheck, 
   Leaf, 
   Package, 
   Disc, 
   Heart,
-  Palette
+  Palette,
+  ShieldCheck
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -209,12 +209,6 @@ export const Footer: React.FC = () => {
                   Eco-Friendly Printing
                 </button>
               </li>
-              <li>
-                <button onClick={() => navigate('admin')} className="text-purple-400 hover:text-white font-mono flex items-center gap-1 transition-colors mt-2 pt-2 border-t border-studio-border">
-                  <ShieldCheck className="w-3.5 h-3.5 text-studio-terracotta" />
-                  <span>Admin Portal</span>
-                </button>
-              </li>
             </ul>
           </div>
 
@@ -269,13 +263,6 @@ export const Footer: React.FC = () => {
             &copy; {new Date().getFullYear()} STICK SCAPE STUDIO. Hand-crafted wall art &amp; Polaroid prints.
           </div>
           <div className="flex items-center gap-4 text-studio-muted">
-            <button 
-              onClick={() => navigate('admin')}
-              className="hover:text-purple-300 transition-colors flex items-center gap-1"
-            >
-              <ShieldCheck className="w-3 h-3 text-studio-terracotta" /> Staff Portal
-            </button>
-            <span>&bull;</span>
             <span>Designed for Youth Living Spaces</span>
             <span>&bull;</span>
             <span className="flex items-center gap-1 text-purple-400">
