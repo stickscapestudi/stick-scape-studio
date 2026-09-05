@@ -195,17 +195,6 @@ export const Navbar: React.FC = () => {
                       <span>My Orders</span>
                     </button>
 
-                    <button
-                      onClick={() => {
-                        setUserDropdownOpen(false);
-                        navigate('admin');
-                      }}
-                      className="w-full text-left p-2 rounded-xl hover:bg-purple-950/40 text-purple-300 hover:text-purple-200 flex items-center gap-2 transition-colors border-t border-studio-border/70 mt-1 pt-2"
-                    >
-                      <ShieldCheck className="w-4 h-4 text-studio-terracotta" />
-                      <span>Admin Portal</span>
-                    </button>
-
                     <div className="border-t border-studio-border/70 pt-1">
                       <button
                         onClick={() => {
