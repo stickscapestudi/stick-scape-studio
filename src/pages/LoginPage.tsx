@@ -147,18 +147,18 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Prompt user or use quick Google login
+      // Prompt user for Google email address
       const promptEmail = prompt(
-        'Sign in with Google Account:\nEnter your Google Email Address (or press OK to use sample Google Account):',
-        email || 'collector.google@gmail.com'
+        'Sign in with Google Account:\nEnter your Google Email Address:',
+        email || ''
       );
 
-      if (promptEmail === null) {
+      if (!promptEmail || !promptEmail.trim()) {
         setIsSubmitting(false);
         return;
       }
 
-      const googleEmail = promptEmail.trim() || 'collector.google@gmail.com';
+      const googleEmail = promptEmail.trim();
       const googleName = googleEmail.split('@')[0].replace(/[._]/g, ' ').toUpperCase();
       const mockGoogleId = `google_sub_${Math.abs(
         googleEmail.split('').reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0)
@@ -328,6 +328,7 @@ export const LoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
+                autoComplete="off"
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-studio-sand border border-studio-border text-studio-charcoal placeholder-studio-muted/60 text-sm focus:outline-none focus:border-studio-terracotta transition-colors font-mono"
               />
             </div>
@@ -353,6 +354,7 @@ export const LoginPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={mode === 'register' ? 'At least 6 characters' : '••••••••'}
+                autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
                 className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-studio-sand border border-studio-border text-studio-charcoal placeholder-studio-muted/60 text-sm focus:outline-none focus:border-studio-terracotta transition-colors font-mono"
               />
               <button

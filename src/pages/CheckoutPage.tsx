@@ -181,16 +181,16 @@ export const CheckoutPage: React.FC = () => {
 
     try {
       const promptEmail = prompt(
-        'Sign in with Google Account:\nEnter your Google Email Address (or press OK to use sample Google Account):',
-        authEmail || 'collector.google@gmail.com'
+        'Sign in with Google Account:\nEnter your Google Email Address:',
+        authEmail || ''
       );
 
-      if (promptEmail === null) {
+      if (!promptEmail || !promptEmail.trim()) {
         setIsAuthSubmitting(false);
         return;
       }
 
-      const googleEmail = promptEmail.trim() || 'collector.google@gmail.com';
+      const googleEmail = promptEmail.trim();
       const googleName = googleEmail.split('@')[0].replace(/[._]/g, ' ').toUpperCase();
       const mockGoogleId = `google_sub_${Math.abs(
         googleEmail.split('').reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0)
@@ -507,6 +507,7 @@ export const CheckoutPage: React.FC = () => {
                       value={authEmail}
                       onChange={(e) => setAuthEmail(e.target.value)}
                       placeholder="name@example.com"
+                      autoComplete="off"
                       className="w-full bg-studio-sand border border-studio-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-studio-muted focus:outline-none focus:border-studio-terracotta"
                     />
                   </div>
@@ -524,6 +525,7 @@ export const CheckoutPage: React.FC = () => {
                       value={authPassword}
                       onChange={(e) => setAuthPassword(e.target.value)}
                       placeholder={authMode === 'register' ? 'Minimum 6 characters' : 'Enter your password'}
+                      autoComplete={authMode === 'register' ? 'new-password' : 'current-password'}
                       className="w-full bg-studio-sand border border-studio-border rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-studio-muted focus:outline-none focus:border-studio-terracotta"
                     />
                     <button
