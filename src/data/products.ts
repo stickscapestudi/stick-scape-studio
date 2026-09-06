@@ -31,9 +31,7 @@ export const BUNDLE_SIZES: ProductSize[] = [
 
 /* ✏️ SIZES FOR HANDMADE BOUQUETS */
 export const BOUQUET_SIZES: ProductSize[] = [
-  { id: 'bouquet-petite', name: 'Petite Bloom (3-Stem Sweetheart Pack)', dimensions: 'Compact 25 × 18 cm Gift Wrap', priceMultiplier: 1.0, inStock: true },
-  { id: 'bouquet-classic', name: 'Classic Luxe Bloom (7-Stem Full Arrangement)', dimensions: 'Standard 35 × 26 cm Luxury Wrap', priceMultiplier: 499 / 299, inStock: true },
-  { id: 'bouquet-grand', name: 'Grand Statement Bloom (12 Stems + Warm Fairy Lights)', dimensions: 'Grand 45 × 32 cm Keepsake Bouquet', priceMultiplier: 799 / 299, inStock: true },
+  { id: 'standard', name: 'Standard Bouquet', dimensions: 'Standard Arrangement', priceMultiplier: 1.0, inStock: true },
 ];
 
 /* ✏️ FRAMING & FINISH OPTIONS FOR POSTERS (IN RUPEES) */
@@ -506,7 +504,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
       detail: '/butterfly-glow-bouquet.jpg',
     },
     sizes: BOUQUET_SIZES,
-    finishes: BOUQUET_FINISHES,
     rating: 4.9,
     reviewCount: 38,
     isBestSeller: true,
@@ -533,7 +530,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
       detail: '/polaroid-memory-bouquet.jpg',
     },
     sizes: BOUQUET_SIZES,
-    finishes: BOUQUET_FINISHES,
     rating: 5.0,
     reviewCount: 62,
     isBestSeller: true,
@@ -560,7 +556,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
       detail: '/vintage-dried-bouquet.jpg',
     },
     sizes: BOUQUET_SIZES,
-    finishes: BOUQUET_FINISHES,
     rating: 4.8,
     reviewCount: 29,
     isBestSeller: false,
