@@ -5,12 +5,11 @@ import { ProductCard } from '../components/common/ProductCard';
 import { 
   Gift, 
   Flower2, 
-  CheckCircle2, 
   ShieldCheck, 
   Leaf, 
-  Clock,
-  ArrowRight,
-  Sparkles
+  Clock, 
+  ArrowRight, 
+  Sparkles 
 } from 'lucide-react';
 
 const OCCASIONS = ['All', 'Birthday', 'Anniversary & Love', 'Room Decor', 'Graduation', 'Gifting'];
@@ -45,16 +44,6 @@ export const BouquetPage: React.FC = () => {
               <h1 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl text-white tracking-tight leading-[1.1]">
                 Flowers that <span className="italic font-serif font-normal text-purple-400 underline decoration-purple-500/60 decoration-wavy">never fade</span>, made for eternal memories.
               </h1>
-
-              <p className="text-sm sm:text-base text-studio-muted leading-relaxed">
-                Explore hand-knitted crochet tulips, glowing fairy light butterfly bouquets, personalized Polaroid photo arrangements, and naturally dried botanicals. No watering, zero wilting, 100% aesthetic.
-              </p>
-
-              <div className="flex flex-wrap items-center gap-6 pt-2 text-xs font-mono text-purple-300">
-                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-purple-400" /> 100% Milk Cotton &amp; Dried Florals</span>
-                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-purple-400" /> Free Handwritten Gift Card</span>
-                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-purple-400" /> Gift-Ready Luxury Packaging</span>
-              </div>
             </div>
 
             {/* Quick Hero Floating Preview */}
@@ -73,13 +62,16 @@ export const BouquetPage: React.FC = () => {
                     <div className="font-bold text-white">Kit Kat And Love Rose Bouquet</div>
                     <div className="text-[11px] text-purple-400 font-mono">From ₹150</div>
                   </div>
-                  <a
-                    href="#bouquet-catalog"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      document.getElementById('bouquet-catalog')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
                     className="bg-studio-terracotta text-black hover:bg-purple-400 px-3.5 py-1.5 rounded-lg text-xs font-bold font-mono transition-colors shadow-sm flex items-center gap-1"
                   >
                     <span>Explore Drops</span>
                     <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>

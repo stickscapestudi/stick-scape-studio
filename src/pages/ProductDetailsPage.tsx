@@ -71,11 +71,32 @@ export const ProductDetailsPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
       
-      {/* Breadcrumb Navigation */}
+      {/* Breadcrumb Navigation with Back Button */}
       <div className="flex items-center gap-2 text-xs font-mono text-purple-300/70">
+        <button
+          onClick={() => {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              navigate('home');
+            }
+          }}
+          className="inline-flex items-center gap-1 text-purple-400 hover:text-white transition-colors mr-2 pr-2.5 border-r border-purple-500/30 font-bold"
+        >
+          &larr; Back
+        </button>
         <button onClick={() => navigate('home')} className="hover:text-white transition-colors">Home</button>
         <span>/</span>
-        <button onClick={() => navigate('shop', { category: product.category })} className="hover:text-white transition-colors capitalize">
+        <button 
+          onClick={() => {
+            if (product.category === 'bouquets' || product.category === 'posters' || product.category === 'polaroids') {
+              navigate(product.category);
+            } else {
+              navigate('shop', { category: product.category });
+            }
+          }} 
+          className="hover:text-white transition-colors capitalize"
+        >
           {product.category}
         </button>
         <span>/</span>

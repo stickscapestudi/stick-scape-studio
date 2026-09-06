@@ -78,30 +78,55 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
       }
 
       // Determine active path segments (hash takes priority if explicitly set, otherwise pathname)
-      const activeSegments = hashSegments.length > 0 ? hashSegments : pathSegments;
-      const pageSegment = activeSegments[0] || 'home';
-
-      if (pageSegment === 'product' && activeSegments[1]) {
-        queryParams.id = activeSegments[1];
-        return { page: 'product', params: queryParams };
-      }
-
-      if (pageSegment === 'feedback' || pageSegment === 'review' || pageSegment === 'reviews') {
-        return { page: 'reviews', params: queryParams };
-      }
-
-      if (pageSegment === 'bouquet' || pageSegment === 'bouquets') {
-        return { page: 'bouquets', params: queryParams };
-      }
-
       const validPages: PageRoute[] = [
         'home', 'shop', 'posters', 'polaroids', 'bouquets', 'product',
         'cart', 'checkout', 'about', 'contact', 'reviews', 'order-confirmation', 'track-order',
         'login', 'account', 'admin'
       ];
 
-      if (validPages.includes(pageSegment as PageRoute)) {
-        return { page: pageSegment as PageRoute, params: queryParams };
+      let pageSegment: PageRoute = 'home';
+      if (
+        hashSegments.length > 0 &&
+        (validPages.includes(hashSegments[0] as PageRoute) ||
+          hashSegments[0] === 'feedback' ||
+          hashSegments[0] === 'review' ||
+          hashSegments[0] === 'reviews' ||
+          hashSegments[0] === 'bouquet' ||
+          hashSegments[0] === 'bouquets')
+      ) {
+        if (hashSegments[0] === 'feedback' || hashSegments[0] === 'review' || hashSegments[0] === 'reviews') {
+          pageSegment = 'reviews';
+        } else if (hashSegments[0] === 'bouquet' || hashSegments[0] === 'bouquets') {
+          pageSegment = 'bouquets';
+        } else {
+          pageSegment = hashSegments[0] as PageRoute;
+        }
+
+        if (pageSegment === 'product' && hashSegments[1]) {
+          queryParams.id = hashSegments[1];
+        }
+        return { page: pageSegment, params: queryParams };
+      } else if (
+        pathSegments.length > 0 &&
+        (validPages.includes(pathSegments[0] as PageRoute) ||
+          pathSegments[0] === 'feedback' ||
+          pathSegments[0] === 'review' ||
+          pathSegments[0] === 'reviews' ||
+          pathSegments[0] === 'bouquet' ||
+          pathSegments[0] === 'bouquets')
+      ) {
+        if (pathSegments[0] === 'feedback' || pathSegments[0] === 'review' || pathSegments[0] === 'reviews') {
+          pageSegment = 'reviews';
+        } else if (pathSegments[0] === 'bouquet' || pathSegments[0] === 'bouquets') {
+          pageSegment = 'bouquets';
+        } else {
+          pageSegment = pathSegments[0] as PageRoute;
+        }
+
+        if (pageSegment === 'product' && pathSegments[1]) {
+          queryParams.id = pathSegments[1];
+        }
+        return { page: pageSegment, params: queryParams };
       }
 
     } catch {
@@ -157,13 +182,33 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
 
   // Sync state on history change (browser back/forward button, URL change)
   useEffect(() => {
-    const handleLocationChange = () => {
-      const route = parseRoute();
-      changeRouteState(route.page, route.params);
+    const handleLocationChange = (event?: Event) => {
+      const popEvent = event as PopStateEvent | undefined;
+      if (popEvent && popEvent.state && popEvent.state.page) {
+        changeRouteState(popEvent.state.page, popEvent.state.params || {});
+      } else {
+        const route = parseRoute();
+        changeRouteState(route.page, route.params);
+      }
     };
 
     window.addEventListener('popstate', handleLocationChange);
     window.addEventListener('hashchange', handleLocationChange);
+
+    // Initial history state replacement if empty so first back navigation is smooth
+    if (!window.history.state) {
+      const route = parseRoute();
+      let hashUrl = `#/${route.page === 'home' ? '' : route.page}`;
+      if (route.page === 'product' && route.params.id) {
+        hashUrl = `#/${route.page}/${route.params.id}`;
+      }
+      try {
+        window.history.replaceState({ page: route.page, params: route.params }, '', hashUrl);
+      } catch {
+        // Fallback
+      }
+    }
+
     return () => {
       window.removeEventListener('popstate', handleLocationChange);
       window.removeEventListener('hashchange', handleLocationChange);
@@ -173,7 +218,7 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
   const navigate = (page: PageRoute, newParams: Record<string, string> = {}) => {
     changeRouteState(page, newParams);
 
-    // Build URL hash and history state
+    // Build URL representation
     let hashUrl = `#/${page === 'home' ? '' : page}`;
     if (page === 'product' && newParams.id) {
       hashUrl = `#/${page}/${newParams.id}`;
@@ -190,16 +235,13 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
       hashUrl += `?${queryString}`;
     }
 
-    // Safely update history and hash
+    // Single unified history push
     try {
-      const pathname = page === 'home' ? '/' : `/${page}`;
-      const pathWithQuery = queryString ? `${pathname}?${queryString}` : pathname;
-      window.history.pushState({ page, params: newParams }, '', pathWithQuery);
+      window.history.pushState({ page, params: newParams }, '', hashUrl);
     } catch {
-      // Fallback
+      window.location.hash = hashUrl;
     }
 
-    window.location.hash = hashUrl;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
