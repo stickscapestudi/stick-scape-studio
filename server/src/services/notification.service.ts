@@ -1,3 +1,5 @@
+import { env } from '../config/env.js';
+
 export type NotificationEventType = 'OrderCreated' | 'OrderStatusChanged';
 
 export interface NotificationEvent {
@@ -42,8 +44,64 @@ export class ConsoleNotificationProvider implements NotificationProvider {
   }
 }
 
+export class TelegramNotificationProvider implements NotificationProvider {
+  name = 'TelegramNotificationProvider';
+
+  async send(event: NotificationEvent): Promise<void> {
+    if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) {
+      console.log('⚠️ Telegram notification disabled: credentials not configured.');
+      return;
+    }
+
+    let message = '';
+
+    if (event.type === 'OrderCreated') {
+      message = [
+        '🔔 NEW ORDER!',
+        '',
+        `📦 Order: #${event.orderNumber}`,
+        `👤 Customer: ${event.customerName}`,
+        `📱 Mobile: ${event.mobile}`,
+        `💰 Total: ₹${event.totalAmount.toFixed(2)}`,
+        `📍 Status: ${event.status}`,
+      ].join('\n');
+    } else {
+      message = [
+        '🔄 ORDER STATUS UPDATED',
+        '',
+        `📦 Order: #${event.orderNumber}`,
+        `👤 Customer: ${event.customerName}`,
+        `📱 Mobile: ${event.mobile}`,
+        `🔄 Status: ${event.previousStatus} → ${event.status}`,
+      ].join('\n');
+    }
+
+    const response = await fetch(
+      `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: env.TELEGRAM_CHAT_ID,
+          text: message,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Telegram API error: ${errorText}`);
+    }
+  }
+}
+
 class NotificationServiceManager {
-  private providers: NotificationProvider[] = [new ConsoleNotificationProvider()];
+  private providers: NotificationProvider[] = [
+    new ConsoleNotificationProvider(),
+    new TelegramNotificationProvider(),
+  ];
 
   /**
    * Safely emits an order created event to all configured notification providers.

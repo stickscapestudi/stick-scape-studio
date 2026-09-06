@@ -50,6 +50,8 @@ const envSchema = z.object({
   RAZORPAY_KEY_ID: z.string().optional().default(''),
   RAZORPAY_KEY_SECRET: z.string().optional().default(''),
   RAZORPAY_WEBHOOK_SECRET: z.string().optional().default(''),
+  TELEGRAM_BOT_TOKEN: z.string().optional().default(''),
+  TELEGRAM_CHAT_ID: z.string().optional().default(''),
 });
 
 const _env = envSchema.safeParse(process.env);
@@ -75,6 +77,8 @@ export const env = _env.success
       RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || '',
       RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || '',
       RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET || '',
+      TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '',
+      TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID || '',
     };
 
 
