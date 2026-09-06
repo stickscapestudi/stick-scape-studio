@@ -92,7 +92,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         {/* Quick Add overlay button on desktop hover */}
         <div className="absolute bottom-3 inset-x-3 hidden sm:block transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20">
-          {showSizePicker ? (
+          {showSizePicker && product.sizes && product.sizes.length > 1 ? (
             <div 
               onClick={(e) => e.stopPropagation()} 
               className="bg-studio-dark/95 backdrop-blur-md text-white p-2 rounded-xl shadow-xl space-y-1.5 border border-purple-500/30 animate-fadeIn"
@@ -125,7 +125,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setShowSizePicker(true);
+                  if (product.sizes && product.sizes.length > 1) {
+                    setShowSizePicker(true);
+                  } else {
+                    handleQuickAdd(e);
+                  }
                 }}
                 className="flex-1 bg-studio-terracotta hover:bg-studio-terracottaHover text-white backdrop-blur-md py-2.5 px-3 rounded-xl font-display font-bold text-xs uppercase tracking-wider transition-colors shadow-lg flex items-center justify-center gap-1.5 border border-purple-400/30"
               >
@@ -180,9 +184,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 ₹{Math.round(Number(currentPrice))}
               </span>
             </div>
-            <span className="text-[10px] text-purple-400/80 font-mono block -mt-0.5">
-              {selectedSize.name.split(' ')[0]} format
-            </span>
+            {product.sizes && product.sizes.length > 1 && (
+              <span className="text-[10px] text-purple-400/80 font-mono block -mt-0.5">
+                {selectedSize.name.split(' ')[0]} format
+              </span>
+            )}
           </div>
 
           {/* Mobile Quick Add Button */}

@@ -61,8 +61,8 @@ export const BouquetPage: React.FC = () => {
             <div className="relative w-full max-w-sm flex-shrink-0">
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-purple-500/30 group bg-studio-card p-2">
                 <img
-                  src="/crochet-tulip-bouquet.jpg"
-                  alt="Pastel Dreams Crochet Bloom"
+                  src="/kitkat-rose-bouquet.jpg"
+                  alt="Kit Kat And Love Rose Bouquet"
                   className="w-full h-72 sm:h-80 object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute top-4 left-4 bg-purple-950/90 backdrop-blur-md px-3 py-1 rounded-full border border-purple-500/50 text-[11px] font-mono text-purple-200 font-bold">
@@ -70,8 +70,8 @@ export const BouquetPage: React.FC = () => {
                 </div>
                 <div className="absolute bottom-4 left-4 right-4 bg-studio-dark/90 backdrop-blur-md p-3.5 rounded-xl border border-purple-500/30 flex items-center justify-between text-xs">
                   <div>
-                    <div className="font-bold text-white">Pastel Dreams Crochet Bloom</div>
-                    <div className="text-[11px] text-purple-400 font-mono">From ₹349</div>
+                    <div className="font-bold text-white">Kit Kat And Love Rose Bouquet</div>
+                    <div className="text-[11px] text-purple-400 font-mono">From ₹150</div>
                   </div>
                   <a
                     href="#bouquet-catalog"

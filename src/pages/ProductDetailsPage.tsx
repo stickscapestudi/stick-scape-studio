@@ -173,46 +173,50 @@ export const ProductDetailsPage: React.FC = () => {
               </span>
             </div>
 
-            <p className="text-sm text-studio-muted mt-3 leading-relaxed">
-              {product.description}
-            </p>
+            {product.description && product.description.trim().length > 0 && (
+              <p className="text-sm text-studio-muted mt-3 leading-relaxed">
+                {product.description}
+              </p>
+            )}
           </div>
 
           {/* Configuration Form */}
           <div className="space-y-5 pt-4 border-t border-studio-border">
             
             {/* 1. Size / Pack Selector */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-mono uppercase font-bold text-purple-200">
-                  {product.category === 'polaroids' && product.finishes && product.finishes.length > 0
-                    ? '1. Choose Pack Format:'
-                    : 'Choose Size / Format:'}
-                </span>
-                <span className="font-mono text-studio-muted text-[11px]">
-                  {selectedSize.dimensions}
-                </span>
-              </div>
+            {product.sizes && product.sizes.length > 1 && (
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-mono uppercase font-bold text-purple-200">
+                    {product.category === 'polaroids' && product.finishes && product.finishes.length > 0
+                      ? '1. Choose Pack Format:'
+                      : 'Choose Size / Format:'}
+                  </span>
+                  <span className="font-mono text-studio-muted text-[11px]">
+                    {selectedSize?.dimensions}
+                  </span>
+                </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {product.sizes.map((sz) => (
-                  <button
-                    key={sz.id}
-                    onClick={() => setSelectedSize(sz)}
-                    className={`p-3 rounded-xl border text-left transition-all ${
-                      selectedSize.id === sz.id
-                        ? 'border-purple-500 bg-purple-950/70 shadow-sm ring-1 ring-purple-500'
-                        : 'border-studio-border bg-studio-sand/40 hover:bg-studio-sand'
-                    }`}
-                  >
-                    <div className="text-xs font-bold text-white">{sz.name}</div>
-                    <div className="text-[11px] font-mono text-purple-300 font-semibold mt-0.5">
-                      ₹{Math.round(product.price * sz.priceMultiplier)}
-                    </div>
-                  </button>
-                ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {product.sizes.map((sz) => (
+                    <button
+                      key={sz.id}
+                      onClick={() => setSelectedSize(sz)}
+                      className={`p-3 rounded-xl border text-left transition-all ${
+                        selectedSize?.id === sz.id
+                          ? 'border-purple-500 bg-purple-950/70 shadow-sm ring-1 ring-purple-500'
+                          : 'border-studio-border bg-studio-sand/40 hover:bg-studio-sand'
+                      }`}
+                    >
+                      <div className="text-xs font-bold text-white">{sz.name}</div>
+                      <div className="text-[11px] font-mono text-purple-300 font-semibold mt-0.5">
+                        ₹{Math.round(product.price * sz.priceMultiplier)}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* 2. Finish / Ribbon / Border Style Selector */}
             {product.finishes && product.finishes.length > 0 && (
